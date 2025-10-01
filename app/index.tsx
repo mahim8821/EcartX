@@ -1,4 +1,5 @@
-import { Redirect } from "expo-router";
-export default function TabIndex() {
-  return <Redirect href="/(tabs)/browse" />;
+import { Redirect } from 'expo-router';
+export default function Index() {
+  return <Redirect href="splash" />;
 }
+//return <Redirect href="/(tabs)/browse" />;

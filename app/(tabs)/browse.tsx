@@ -1,6 +1,6 @@
 // app/(tabs)/browse.tsx
 import { Stack } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -23,14 +23,62 @@ type Product = {
 };
 
 const PRODUCTS: Product[] = [
-  { id: "p1", title: "Classic T-Shirt", price: 19.99, image: require("../../assets/images/tshirt.png"),       rating: 4.5 },
-  { id: "p2", title: "Sneakers",        price: 59.0,  image: require("../../assets/images/sneakers.jpg"),     rating: 4.2 },
-  { id: "p3", title: "Backpack",        price: 29.5,  image: require("../../assets/images/backpack.jpeg"),    rating: 4.7 },
-  { id: "p4", title: "Headphones",      price: 89.0,  image: require("../../assets/images/Headphones.jpeg"),  rating: 4.1 },
-  { id: "p5", title: "Watch",           price: 120.0, image: require("../../assets/images/watchs.webp"),      rating: 4.8 },
-  { id: "p6", title: "Sunglasses",      price: 25.0,  image: require("../../assets/images/sunglasses.jpg"),   rating: 4.0 },
-  { id: "p7", title: "Hoodie",          price: 39.0,  image: require("../../assets/images/hoodie.jpg"),       rating: 4.4 },
-  { id: "p8", title: "Cap",             price: 14.0,  image: require("../../assets/images/cap.jpeg"),         rating: 3.9 },
+  {
+    id: "p1",
+    title: "Classic T-Shirt",
+    price: 19.99,
+    image: require("../../assets/images/tshirt.png"),
+    rating: 4.5,
+  },
+  {
+    id: "p2",
+    title: "Sneakers",
+    price: 59.0,
+    image: require("../../assets/images/sneakers.jpg"),
+    rating: 4.2,
+  },
+  {
+    id: "p3",
+    title: "Backpack",
+    price: 29.5,
+    image: require("../../assets/images/backpack.jpeg"),
+    rating: 4.7,
+  },
+  {
+    id: "p4",
+    title: "Headphones",
+    price: 89.0,
+    image: require("../../assets/images/Headphones.jpeg"),
+    rating: 4.1,
+  },
+  {
+    id: "p5",
+    title: "Watch",
+    price: 120.0,
+    image: require("../../assets/images/watchs.webp"),
+    rating: 4.8,
+  },
+  {
+    id: "p6",
+    title: "Sunglasses",
+    price: 25.0,
+    image: require("../../assets/images/sunglasses.jpg"),
+    rating: 4.0,
+  },
+  {
+    id: "p7",
+    title: "Hoodie",
+    price: 39.0,
+    image: require("../../assets/images/hoodie.jpg"),
+    rating: 4.4,
+  },
+  {
+    id: "p8",
+    title: "Cap",
+    price: 14.0,
+    image: require("../../assets/images/cap.jpeg"),
+    rating: 3.9,
+  },
 ];
 
 export default function BrowseScreen() {
@@ -50,7 +98,11 @@ export default function BrowseScreen() {
         options={{
           title: "EcartX",
           headerStyle: { backgroundColor: colors.bg },
-          headerTitleStyle: { color: colors.fg, fontWeight: "800", letterSpacing: 0.3 },
+          headerTitleStyle: {
+            color: colors.fg,
+            fontWeight: "800",
+            letterSpacing: 0.3,
+          },
           headerTintColor: colors.fg,
         }}
       />
@@ -80,7 +132,11 @@ export default function BrowseScreen() {
         keyExtractor={(item) => String(item.id)}
         numColumns={2}
         columnWrapperStyle={{ gap: 12, paddingHorizontal: 12 }}
-        contentContainerStyle={{ paddingVertical: 12, gap: 12, paddingBottom: 20 }}
+        contentContainerStyle={{
+          paddingVertical: 12,
+          gap: 12,
+          paddingBottom: 20,
+        }}
         ListHeaderComponent={
           <Text style={[styles.count, { color: colors.muted }]}>
             {data.length} of {PRODUCTS.length} items
@@ -104,15 +160,24 @@ export default function BrowseScreen() {
           >
             {/* Image area with price chip */}
             <Pressable style={styles.imageWrap}>
-              <Image source={item.image} style={styles.image} resizeMode="cover" />
+              <Image
+                source={item.image}
+                style={styles.image}
+                resizeMode="cover"
+              />
               <View style={styles.priceChip}>
-                <Text style={styles.priceChipText}>${item.price.toFixed(2)}</Text>
+                <Text style={styles.priceChipText}>
+                  ${item.price.toFixed(2)}
+                </Text>
               </View>
             </Pressable>
 
             {/* Meta */}
             <View style={{ padding: 10 }}>
-              <Text style={[styles.title, { color: colors.fg }]} numberOfLines={1}>
+              <Text
+                style={[styles.title, { color: colors.fg }]}
+                numberOfLines={1}
+              >
                 {item.title}
               </Text>
               <Text style={[styles.rating, { color: colors.muted }]}>
@@ -122,11 +187,21 @@ export default function BrowseScreen() {
               {/* CTA */}
               <Pressable
                 onPress={() =>
-                  add({ id: item.id, title: item.title, price: item.price, image: item.image }, 1)
+                  add(
+                    {
+                      id: item.id,
+                      title: item.title,
+                      price: item.price,
+                      image: item.image,
+                    },
+                    1
+                  )
                 }
                 style={[styles.addBtn, { backgroundColor: colors.tint }]}
               >
-                <Text style={{ color: colors.bg, fontWeight: "700" }}>Add to Cart</Text>
+                <Text style={{ color: colors.bg, fontWeight: "700" }}>
+                  Add to Cart
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -140,14 +215,18 @@ export default function BrowseScreen() {
 function stars(rating: number) {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5 ? 1 : 0;
-  return "★".repeat(full) + (half ? "½" : "") + "☆".repeat(Math.max(0, 5 - full - half));
+  return (
+    "★".repeat(full) +
+    (half ? "½" : "") +
+    "☆".repeat(Math.max(0, 5 - full - half))
+  );
 }
 
 const styles = StyleSheet.create({
   searchRow: { paddingHorizontal: 12, paddingTop: 12 },
   search: {
     borderWidth: 1,
-    borderRadius: 22,               // pill
+    borderRadius: 22, // pill
     paddingVertical: 12,
     paddingHorizontal: 14,
     fontSize: 16,

@@ -1,40 +1,53 @@
 // lib/theme.tsx
-import React, { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 type Colors = {
-  bg: string; fg: string; muted: string; card: string; border: string; tint: string;
-  success: string; danger: string; warning: string;
+  bg: string;
+  fg: string;
+  muted: string;
+  card: string;
+  border: string;
+  tint: string;
+  success: string;
+  danger: string;
+  warning: string;
 };
 type Theme = {
   dark: boolean;
   toggle: () => void;
   colors: Colors;
   radius: { sm: number; md: number; lg: number; xl: number };
-  spacing: (n: number) => number;        // spacing(2) = 8
+  spacing: (n: number) => number; // spacing(2) = 8
   shadow: (elev?: 3 | 6 | 12) => object; // cross-platform shadow helper
 };
 
 const LIGHT: Colors = {
-  bg: "#ffffff",
+  bg: "#ffffffff",
   fg: "#0b0b0f",
-  muted: "#6b7280",
+  muted: "#3a4150ff",
   card: "#f9fafb",
-  border: "#e5e7eb",
-  tint: "#0a515f",   // your teal
+  border: "#bdc2caff",
+  tint: "#0a515f", // your teal
   success: "#16a34a",
-  danger:  "#ef4444",
+  danger: "#ef4444",
   warning: "#f59e0b",
 };
 
 const DARK: Colors = {
-  bg: "#0b0b0f",
-  fg: "#f2f2f7",
+  bg: "#02151fff",
+  fg: "#d4d4eeff",
   muted: "#a3a3ad",
-  card: "#14141a",
-  border: "#26262f",
-  tint: "#20b6c6",
+  card: "#2b2b3aff",
+  border: "#133d5dff",
+  tint: "#0aabbaff",
   success: "#22c55e",
-  danger:  "#f87171",
+  danger: "#f87171",
   warning: "#fbbf24",
 };
 
@@ -46,15 +59,33 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const colors = dark ? DARK : LIGHT;
     return {
       dark,
-      toggle: () => setDark(d => !d),
+      toggle: () => setDark((d) => !d),
       colors,
       radius: { sm: 8, md: 12, lg: 16, xl: 22 },
       spacing: (n: number) => n * 4,
       shadow: (elev: 3 | 6 | 12 = 3) => {
         const map = {
-          3: { shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 3 },
-          6: { shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 6 },
-          12:{ shadowColor: "#000", shadowOpacity: 0.16, shadowRadius: 20, shadowOffset: { width: 0, height: 12}, elevation: 12 },
+          3: {
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            shadowOffset: { width: 0, height: 3 },
+            elevation: 3,
+          },
+          6: {
+            shadowColor: "#000",
+            shadowOpacity: 0.12,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 6 },
+            elevation: 6,
+          },
+          12: {
+            shadowColor: "#000",
+            shadowOpacity: 0.16,
+            shadowRadius: 20,
+            shadowOffset: { width: 0, height: 12 },
+            elevation: 12,
+          },
         } as const;
         return map[elev];
       },

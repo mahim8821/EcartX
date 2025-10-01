@@ -1,7 +1,5 @@
-// app/(tabs)/_layout.tsx
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import React from "react";
 import { Text, View } from "react-native";
 import { useCart } from "../../lib/cart"; // ✅ make sure you created lib/cart.tsx and wrapped app with <CartProvider>
 
@@ -56,13 +54,12 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
   headerTitle: "EcartX",
-  headerStyle: { backgroundColor: "#ffffff" },
+  headerStyle: { backgroundColor: "#ffffffff" },
   headerTitleStyle: { fontWeight: "800", letterSpacing: 0.3 },
-  headerTintColor: "#0a515f",
+  headerTintColor: "#0aa2c0ff",
   tabBarStyle: {
     backgroundColor: "#0a515f",
     borderTopWidth: 0,
-    borderRadius:22,
     height: 75,
     paddingBottom: 6,
     paddingTop: 6,

@@ -1,7 +1,5 @@
-// app/_layout.tsx
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
 import { CartProvider } from "../lib/cart";
 import { ThemeProvider, useTheme } from "../lib/theme";
 
@@ -21,12 +19,20 @@ function RootNav() {
     </>
   );
 }
+//export const unstable_settings = {
+//initialRouteName: "splash",
+//};
 
 export default function RootLayout() {
   return (
     <ThemeProvider>
       <CartProvider>
-        <RootNav />
+        <StatusBar style="light" />
+        <Stack initialRouteName="splash">
+          <Stack.Screen name="splash" options={{ headerShown: false }} />
+          <Stack.Screen name="promo" options={{ headerShown: false }} />
+          {/* ...other screens */}
+        </Stack>
       </CartProvider>
     </ThemeProvider>
   );
