@@ -17,7 +17,8 @@ It includes features like browsing products, adding to cart, checkout, payment f
 ---
 
 ## 📸 Screenshots
-![Uploading image.png…]()
+![Uploading Simulator Screenshot - iPhone 15 Pro Max - 2025-10-02 at 19.55.34.png…]()
+
 
 
 ---
