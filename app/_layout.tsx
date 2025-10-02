@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { CartProvider } from "../lib/cart";
-import { ThemeProvider, useTheme } from "../lib/theme";
+import { ThemeProvider } from "../lib/theme";
 
 function RootNav() {
   const { colors } = useTheme();
@@ -31,7 +31,7 @@ export default function RootLayout() {
         <Stack initialRouteName="splash">
           <Stack.Screen name="splash" options={{ headerShown: false }} />
           <Stack.Screen name="promo" options={{ headerShown: false }} />
-          {/* ...other screens */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
       </CartProvider>
     </ThemeProvider>

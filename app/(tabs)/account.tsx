@@ -3,14 +3,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useTheme } from "../../lib/theme";
 
@@ -72,12 +72,16 @@ export default function AccountScreen() {
 
 /* ---------- Compact mini tabs ---------- */
 
-const SEGMENTS: { key: TabKey; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: "info",     label: "Info",     icon: "person-circle-outline" },
-  { key: "address",  label: "Address",  icon: "home-outline" },
-  { key: "orders",   label: "Orders",   icon: "bag-handle-outline" },
-  { key: "help",     label: "Help",     icon: "help-circle-outline" },
-  { key: "care",     label: "Care",     icon: "call-outline" },
+const SEGMENTS: {
+  key: TabKey;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { key: "info", label: "Info", icon: "person-circle-outline" },
+  { key: "address", label: "Address", icon: "home-outline" },
+  { key: "orders", label: "Orders", icon: "bag-handle-outline" },
+  { key: "help", label: "Help", icon: "help-circle-outline" },
+  { key: "care", label: "Care", icon: "call-outline" },
   { key: "feedback", label: "Feedback", icon: "chatbubble-ellipses-outline" },
 ];
 
@@ -111,16 +115,12 @@ function MiniTab({
       }}
       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
     >
-      <Ionicons
-        name={icon}
-        size={14}
-        color={active ? colors.bg : colors.fg}
-      />
+      <Ionicons name={icon} size={14} color={active ? colors.bg : colors.fg} />
       <Text
         style={{
           color: active ? colors.bg : colors.fg,
           fontWeight: "700",
-          fontSize: 12,        // smaller label
+          fontSize: 12, // smaller label
         }}
         numberOfLines={1}
       >
@@ -172,7 +172,11 @@ function TextField({
       keyboardType={keyboardType}
       style={[
         styles.input,
-        { borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+        {
+          borderColor: colors.border,
+          backgroundColor: colors.card,
+          color: colors.fg,
+        },
       ]}
     />
   );
@@ -193,45 +197,90 @@ function AccountInfo({ colors }: any) {
       <View style={{ alignItems: "center", gap: 8 }}>
         <Image
           source={{ uri: "/Users/mahim/MyFirstApp/assets/images/yasir.jpg" }}
-          style={{ width: 86, height: 86, borderRadius: 43, backgroundColor: "#00000010" }}
+          style={{
+            width: 86,
+            height: 86,
+            borderRadius: 43,
+            backgroundColor: "#00000010",
+          }}
         />
         <TouchableOpacity
           style={[styles.smallBtn, { backgroundColor: colors.tint }]}
-          onPress={() => Alert.alert("Change photo", "Wire this up later with ImagePicker.")}
+          onPress={() =>
+            Alert.alert("Change photo", "Wire this up later with ImagePicker.")
+          }
         >
-          <Text style={{ color: colors.bg, fontWeight: "700" }}>Change photo</Text>
+          <Text style={{ color: colors.bg, fontWeight: "700" }}>
+            Change photo
+          </Text>
         </TouchableOpacity>
       </View>
 
       <Row icon="person" label="Full name" colors={colors}>
-        <TextField value={fullName} onChangeText={setFullName} placeholder="Full name" colors={colors} />
+        <TextField
+          value={fullName}
+          onChangeText={setFullName}
+          placeholder="Full name"
+          colors={colors}
+        />
       </Row>
 
       <Row icon="key" label="Change password" colors={colors}>
-        <TextField value={password} onChangeText={setPassword} placeholder="New password" colors={colors} secureTextEntry />
+        <TextField
+          value={password}
+          onChangeText={setPassword}
+          placeholder="New password"
+          colors={colors}
+          secureTextEntry
+        />
       </Row>
 
       <Row icon="call" label="Mobile number" colors={colors}>
-        <TextField value={phone} onChangeText={setPhone} placeholder="+8801XXXXXXXXX" colors={colors} keyboardType="phone-pad" />
+        <TextField
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="+8801XXXXXXXXX"
+          colors={colors}
+          keyboardType="phone-pad"
+        />
       </Row>
 
       <Row icon="mail" label="Email" colors={colors}>
-        <TextField value={email} onChangeText={setEmail} placeholder="you@example.com" colors={colors} keyboardType="email-address" />
+        <TextField
+          value={email}
+          onChangeText={setEmail}
+          placeholder="you@example.com"
+          colors={colors}
+          keyboardType="email-address"
+        />
       </Row>
 
       <Row icon="male-female" label="Gender" colors={colors}>
-        <TextField value={gender} onChangeText={setGender} placeholder="Male/Female/Other" colors={colors} />
+        <TextField
+          value={gender}
+          onChangeText={setGender}
+          placeholder="Male/Female/Other"
+          colors={colors}
+        />
       </Row>
 
       <Row icon="calendar" label="Date of Birth" colors={colors}>
-        <TextField value={dob} onChangeText={setDob} placeholder="YYYY-MM-DD" colors={colors} keyboardType="numbers-and-punctuation" />
+        <TextField
+          value={dob}
+          onChangeText={setDob}
+          placeholder="YYYY-MM-DD"
+          colors={colors}
+          keyboardType="numbers-and-punctuation"
+        />
       </Row>
 
       <TouchableOpacity
         style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
         onPress={() => Alert.alert("Saved ✅", "Account info updated (demo).")}
       >
-        <Text style={{ color: colors.bg, fontWeight: "700" }}>Save changes</Text>
+        <Text style={{ color: colors.bg, fontWeight: "700" }}>
+          Save changes
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -248,18 +297,46 @@ function AddressSection({ colors }: any) {
   return (
     <View style={{ gap: 12 }}>
       <Row icon="home" label="Address" colors={colors}>
-        <TextField value={line1} onChangeText={setLine1} placeholder="House / Road" colors={colors} />
-        <TextField value={line2} onChangeText={setLine2} placeholder="Area / Landmark" colors={colors} />
-        <TextField value={city} onChangeText={setCity} placeholder="City" colors={colors} />
-        <TextField value={zip} onChangeText={setZip} placeholder="Postcode" colors={colors} keyboardType="number-pad" />
-        <TextField value={country} onChangeText={setCountry} placeholder="Country" colors={colors} />
+        <TextField
+          value={line1}
+          onChangeText={setLine1}
+          placeholder="House / Road"
+          colors={colors}
+        />
+        <TextField
+          value={line2}
+          onChangeText={setLine2}
+          placeholder="Area / Landmark"
+          colors={colors}
+        />
+        <TextField
+          value={city}
+          onChangeText={setCity}
+          placeholder="City"
+          colors={colors}
+        />
+        <TextField
+          value={zip}
+          onChangeText={setZip}
+          placeholder="Postcode"
+          colors={colors}
+          keyboardType="number-pad"
+        />
+        <TextField
+          value={country}
+          onChangeText={setCountry}
+          placeholder="Country"
+          colors={colors}
+        />
       </Row>
 
       <TouchableOpacity
         style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
         onPress={() => Alert.alert("Saved ✅", "Address updated (demo).")}
       >
-        <Text style={{ color: colors.bg, fontWeight: "700" }}>Save address</Text>
+        <Text style={{ color: colors.bg, fontWeight: "700" }}>
+          Save address
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -287,7 +364,9 @@ function OrdersSection({ colors }: any) {
           }}
         >
           <Text style={{ color: colors.fg, fontWeight: "700" }}>{o.title}</Text>
-          <Text style={{ color: colors.muted }}>Order #{o.id} • {o.status}</Text>
+          <Text style={{ color: colors.muted }}>
+            Order #{o.id} • {o.status}
+          </Text>
         </View>
       ))}
     </View>
@@ -347,7 +426,13 @@ function FeedbackSection({ colors }: any) {
         placeholderTextColor={colors.muted}
         style={[
           styles.input,
-          { minHeight: 120, textAlignVertical: "top", borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+          {
+            minHeight: 120,
+            textAlignVertical: "top",
+            borderColor: colors.border,
+            backgroundColor: colors.card,
+            color: colors.fg,
+          },
         ]}
       />
       <TouchableOpacity
@@ -357,7 +442,9 @@ function FeedbackSection({ colors }: any) {
           Alert.alert("Thanks! 🫶", "Feedback submitted (demo).");
         }}
       >
-        <Text style={{ color: colors.bg, fontWeight: "700" }}>Submit feedback</Text>
+        <Text style={{ color: colors.bg, fontWeight: "700" }}>
+          Submit feedback
+        </Text>
       </TouchableOpacity>
     </View>
   );

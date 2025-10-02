@@ -1,5 +1,11 @@
 // lib/cart.tsx
-import React, { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { ImageSourcePropType } from "react-native";
 
 export type CartItem = {
@@ -27,8 +33,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const add: CartCtx["add"] = (item, qty = 1) =>
-    setItems(prev => {
-      const i = prev.findIndex(x => x.id === item.id);
+    setItems((prev) => {
+      const i = prev.findIndex((x) => x.id === item.id);
       if (i >= 0) {
         const next = [...prev];
         next[i] = { ...next[i], qty: next[i].qty + qty };
@@ -38,16 +44,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
 
   const increment = (id: string) =>
-    setItems(prev => prev.map(x => (x.id === id ? { ...x, qty: x.qty + 1 } : x)));
-
-  const decrement = (id: string) =>
-    setItems(prev =>
-      prev
-        .map(x => (x.id === id ? { ...x, qty: x.qty - 1 } : x))
-        .filter(x => x.qty > 0)
+    setItems((prev) =>
+      prev.map((x) => (x.id === id ? { ...x, qty: x.qty + 1 } : x))
     );
 
-  const remove = (id: string) => setItems(prev => prev.filter(x => x.id !== id));
+  const decrement = (id: string) =>
+    setItems((prev) =>
+      prev
+        .map((x) => (x.id === id ? { ...x, qty: x.qty - 1 } : x))
+        .filter((x) => x.qty > 0)
+    );
+
+  const remove = (id: string) =>
+    setItems((prev) => prev.filter((x) => x.id !== id));
   const clear = () => setItems([]);
 
   const { totalQty, totalPrice } = useMemo(() => {
@@ -56,7 +65,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return { totalQty: q, totalPrice: p };
   }, [items]);
 
-  const value = { items, add, increment, decrement, remove, clear, totalQty, totalPrice };
+  const value = {
+    items,
+    add,
+    increment,
+    decrement,
+    remove,
+    clear,
+    totalQty,
+    totalPrice,
+  };
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 

@@ -118,14 +118,14 @@ export default function Promo() {
 
       {/* Bottom “Continue” */}
       <Pressable style={styles.continue} onPress={goBrowse}>
-        <Text style={styles.continueText}>Continue to Browse</Text>
+        <Text style={styles.continueText}>Continue to EcartX</Text>
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0B1020", paddingTop: 26 },
+  container: { flex: 1, backgroundColor: "#0B1020", paddingTop: 30 },
   skip: { position: "absolute", right: 30, top: 60, zIndex: 2 },
   skipText: { color: "#ffffffff", fontWeight: "600" },
   header: {
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: "#12182B",
+    backgroundColor: "#182b37ff",
     borderRadius: 20,
     overflow: "hidden",
     height: 360,
@@ -150,10 +150,10 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
   },
-  image: { width: "100%", height: 230 },
+  image: { width: "100%", height: 250 },
   badge: {
     position: "absolute",
-    left: 320,
+    left: 20,
     top: 200,
     backgroundColor: "#EF4444",
     paddingHorizontal: 10,
