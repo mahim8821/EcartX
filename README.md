@@ -17,8 +17,8 @@ It includes features like browsing products, adding to cart, checkout, payment f
 ---
 
 ## 📸 Screenshots
+![Uploading image.png…]()
 
-_(Add screenshots of your app here!)_
 
 ---
 
