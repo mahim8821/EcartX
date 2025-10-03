@@ -1,4 +1,5 @@
-// app/(tabs)/login.tsx
+// app/(auth)/login.tsx
+import { Ionicons } from "@expo/vector-icons"; // 👈 back icon
 import { Link, Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -52,7 +53,7 @@ export default function LoginScreen() {
       setLoading(true);
       await fakeSignIn(email.trim(), password);
       Alert.alert("Signed in ✅");
-      router.push("/(tabs)/browse");
+      router.replace("/(tabs)/browse");
     } catch (e: any) {
       setError(e.message ?? "Sign-in failed");
     } finally {
@@ -71,6 +72,17 @@ export default function LoginScreen() {
           headerStyle: { backgroundColor: colors.bg },
           headerTitleStyle: { color: colors.fg },
           headerTintColor: colors.fg,
+          // 👇 custom back that always goes to Menu tab
+          headerBackVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.replace("/(tabs)/menu")}
+              style={{ paddingHorizontal: 8, paddingVertical: 6 }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="arrow-back" size={22} color={colors.fg} />
+            </TouchableOpacity>
+          ),
         }}
       />
 
@@ -174,7 +186,7 @@ export default function LoginScreen() {
             <Text style={{ marginLeft: 8, color: colors.fg }}>Remember me</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity>
             <Link href="/(auth)/forgot-password" asChild>
               <Text style={[styles.link, { color: colors.fg }]}>Forgot?</Text>
             </Link>
