@@ -49,20 +49,9 @@ function CartIconWithBadge({
   );
 }
 
-export default function TabLayout() {
+export default function TabsLayout() {
   const { dark, toggle, colors } = useTheme();
   return (
-    /*export default function TabsLayout() {
-  //const isDark = useColorScheme() === "dark";
-  const { dark, toggle, colors } = useTheme();
-
-  const headerBg = isDark ? "#0B1820" : "#FFFFFF";
-  const headerText = isDark ? "#FFFFFF" : "#0B1820";
-  const tabBg = isDark ? "#0B1820" : "#FFFFFF";
-  const tabActive = isDark ? "#FFFFFF" : "#0B1820";
-  const tabInactive = isDark ? "#9AA4AA" : "#6B7280";
-  const borderTop = isDark ? "transparent" : "#E5E7EB";
-  return (*/
     <Tabs
       screenOptions={{
         headerTitle: "EcartX",
@@ -76,29 +65,12 @@ export default function TabLayout() {
           paddingBottom: 6,
           borderRadius: 0,
           paddingTop: 6,
+          color: colors.fg,
         },
         tabBarLabelStyle: { fontSize: 14, fontWeight: "550" },
         tabBarActiveTintColor: "#d9ffd9",
         tabBarInactiveTintColor: "#9AA4AA",
       }}
-      /*screenOptions={{
-        headerTitle: "EcartX",
-        headerTitleAlign: "center",
-        headerShadowVisible: false,
-
-        // ⬇️ THEME-AWARE HEADER
-        headerStyle: { backgroundColor: headerBg },
-        headerTintColor: headerText,
-        headerTitleStyle: { color: headerText },
-
-        // ⬇️ THEME-AWARE TAB BAR
-        tabBarStyle: {
-          backgroundColor: tabBg,
-          borderTopColor: borderTop,
-        },
-        tabBarActiveTintColor: tabActive,
-        tabBarInactiveTintColor: tabInactive,
-      }} */
     >
       <Tabs.Screen
         name="browse"
@@ -120,20 +92,6 @@ export default function TabLayout() {
           title: "Cart",
           tabBarIcon: ({ color, size, focused }) => (
             <CartIconWithBadge color={color} size={size} focused={focused} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="login"
-        options={{
-          title: "Sign in",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "person" : "person-outline"}
-              size={size}
-              color={color}
-            />
           ),
         }}
       />
@@ -168,3 +126,15 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+/* export default function TabsLayout() {
+  return (
+    <Tabs screenOptions={{ headerShown: false }}>
+      <Tabs.Screen name="index" options={{ title: "EcartX" }} />
+      <Tabs.Screen name="cart" options={{ title: "Cart" }} />
+      <Tabs.Screen name="account" options={{ title: "Account" }} />
+      <Tabs.Screen name="menu" options={{ title: "Menu" }} />
+    </Tabs>
+  );
+}
+ */

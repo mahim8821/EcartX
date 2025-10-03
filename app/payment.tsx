@@ -2,24 +2,36 @@
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useCart } from "../lib/cart"; // ✅ one level up
 import { useTheme } from "../lib/theme"; // ✅ one level up
-function Row({ label, value, muted, bold }: { label: string; value: string; muted?: boolean; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  muted,
+  bold,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+  bold?: boolean;
+}) {
   const { colors } = useTheme();
   return (
     <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
       <Text style={{ color: muted ? colors.muted : colors.fg }}>{label}</Text>
-      <Text style={{ color: colors.fg, fontWeight: bold ? "800" : "600" }}>{value}</Text>
+      <Text style={{ color: colors.fg, fontWeight: bold ? "800" : "600" }}>
+        {value}
+      </Text>
     </View>
   );
 }
@@ -90,11 +102,16 @@ export default function PaymentScreen() {
         }}
       />
 
-      <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={{ padding: 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={[styles.h1, { color: colors.fg }]}>Customer Info</Text>
         <Text style={{ color: colors.muted, marginBottom: 12 }}>
           Total to pay:{" "}
-          <Text style={{ color: colors.fg, fontWeight: "700" }}>${finalAmount}</Text>
+          <Text style={{ color: colors.fg, fontWeight: "700" }}>
+            ${finalAmount}
+          </Text>
         </Text>
 
         <Text style={[styles.label, { color: colors.fg }]}>Full name *</Text>
@@ -103,7 +120,14 @@ export default function PaymentScreen() {
           onChangeText={setFullName}
           placeholder="John Doe"
           placeholderTextColor={colors.muted}
-          style={[styles.input, { borderColor: colors.border, backgroundColor: colors.card, color: colors.fg }]}
+          style={[
+            styles.input,
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+              color: colors.fg,
+            },
+          ]}
         />
 
         <Text style={[styles.label, { color: colors.fg }]}>Phone *</Text>
@@ -115,7 +139,11 @@ export default function PaymentScreen() {
           placeholderTextColor={colors.muted}
           style={[
             styles.input,
-            { borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+              color: colors.fg,
+            },
             !validPhone && styles.inputError,
           ]}
         />
@@ -130,7 +158,11 @@ export default function PaymentScreen() {
           placeholderTextColor={colors.muted}
           style={[
             styles.input,
-            { borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+              color: colors.fg,
+            },
             !validEmail && styles.inputError,
           ]}
         />
@@ -145,7 +177,11 @@ export default function PaymentScreen() {
           style={[
             styles.input,
             styles.textarea,
-            { borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+              color: colors.fg,
+            },
           ]}
         />
 
@@ -159,29 +195,45 @@ export default function PaymentScreen() {
             placeholderTextColor={colors.muted}
             style={[
               styles.input,
-              { flex: 1, borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+              {
+                flex: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+                color: colors.fg,
+              },
             ]}
           />
-          <TouchableOpacity onPress={applyCoupon} style={[styles.couponBtn, { backgroundColor: colors.tint }]}>
+          <TouchableOpacity
+            onPress={applyCoupon}
+            style={[styles.couponBtn, { backgroundColor: colors.tint }]}
+          >
             <Text style={{ color: colors.bg, fontWeight: "700" }}>Apply</Text>
           </TouchableOpacity>
         </View>
 
         {discount > 0 && (
           <Text style={{ color: colors.muted, marginBottom: 8 }}>
-            Discount applied: <Text style={{ color: colors.fg, fontWeight: "700" }}>- ${discount.toFixed(2)}</Text>
+            Discount applied:{" "}
+            <Text style={{ color: colors.fg, fontWeight: "700" }}>
+              - ${discount.toFixed(2)}
+            </Text>
           </Text>
         )}
         {/* totals row */}
-<View style={{ gap: 6, marginTop: 6, marginBottom: 8 }}>
-  <Row label="Subtotal" value={`$${totalPrice.toFixed(2)}`} />
-  <Row label="Discount" value={`-$${discount.toFixed(2)}`} muted />
-  <Row label="Total" value={`$${finalAmount}`} bold />
-</View>
+        <View style={{ gap: 6, marginTop: 6, marginBottom: 8 }}>
+          <Row label="Subtotal" value={`$${totalPrice.toFixed(2)}`} />
+          <Row label="Discount" value={`-$${discount.toFixed(2)}`} muted />
+          <Row label="Total" value={`$${finalAmount}`} bold />
+        </View>
 
         {/* Pay button */}
-        <TouchableOpacity onPress={onPay} style={[styles.payBtn, { backgroundColor: colors.tint }]}>
-          <Text style={{ color: colors.bg, fontWeight: "700", fontSize: 16 }}>Pay ${finalAmount}</Text>
+        <TouchableOpacity
+          onPress={onPay}
+          style={[styles.payBtn, { backgroundColor: colors.tint }]}
+        >
+          <Text style={{ color: colors.bg, fontWeight: "700", fontSize: 16 }}>
+            Pay ${finalAmount}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -194,6 +246,15 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderRadius: 10, padding: 12, fontSize: 16 },
   textarea: { minHeight: 90, textAlignVertical: "top" },
   inputError: { borderColor: "#ff5a5f" },
-  couponBtn: { paddingHorizontal: 16, borderRadius: 10, justifyContent: "center" },
-  payBtn: { marginTop: 16, paddingVertical: 14, borderRadius: 12, alignItems: "center" },
+  couponBtn: {
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    justifyContent: "center",
+  },
+  payBtn: {
+    marginTop: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
 });

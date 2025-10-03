@@ -2,15 +2,15 @@
 import { Link, Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useTheme } from "../../lib/theme";
 
@@ -22,7 +22,8 @@ function sleep(ms: number) {
 
 async function fakeSignIn(email: string, password: string) {
   await sleep(800); // mock network delay
-  if (email === MOCK_USER.email && password === MOCK_USER.password) return { token: "demo-token" };
+  if (email === MOCK_USER.email && password === MOCK_USER.password)
+    return { token: "demo-token" };
   throw new Error("Invalid email or password");
 }
 
@@ -75,14 +76,20 @@ export default function LoginScreen() {
 
       <View style={[styles.container]}>
         <Text style={[styles.h1, { color: colors.fg }]}>Welcome back 👋</Text>
-        <Text style={[styles.sub, { color: colors.muted }]}>Happy shopping</Text>
+        <Text style={[styles.sub, { color: colors.muted }]}>
+          Happy shopping
+        </Text>
 
         <View style={styles.field}>
           <Text style={[styles.label, { color: colors.fg }]}>Email</Text>
           <TextInput
             style={[
               styles.input,
-              { borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+              {
+                borderColor: colors.border,
+                backgroundColor: colors.card,
+                color: colors.fg,
+              },
               !email || isValidEmail ? null : styles.inputError,
             ]}
             placeholder="you@example.com"
@@ -102,7 +109,12 @@ export default function LoginScreen() {
             <TextInput
               style={[
                 styles.input,
-                { flex: 1, borderColor: colors.border, backgroundColor: colors.card, color: colors.fg },
+                {
+                  flex: 1,
+                  borderColor: colors.border,
+                  backgroundColor: colors.card,
+                  color: colors.fg,
+                },
                 !password || isValidPassword ? null : styles.inputError,
               ]}
               placeholder="••••••"
@@ -112,47 +124,72 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
             />
-            <TouchableOpacity onPress={() => setShowPassword((s) => !s)} style={styles.showBtn}>
-              <Text style={[styles.showText, { color: colors.fg }]}>{showPassword ? "Hide" : "Show"}</Text>
+            <TouchableOpacity
+              onPress={() => setShowPassword((s) => !s)}
+              style={styles.showBtn}
+            >
+              <Text style={[styles.showText, { color: colors.fg }]}>
+                {showPassword ? "Hide" : "Show"}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {error ? <Text style={[styles.err, { color: "#ff5a5f" }]}>{error}</Text> : null}
+        {error ? (
+          <Text style={[styles.err, { color: "#ff5a5f" }]}>{error}</Text>
+        ) : null}
 
         <TouchableOpacity
           style={[
             styles.btn,
-            { backgroundColor: colors.tint, opacity: !formValid || loading ? 0.5 : 1 },
+            {
+              backgroundColor: colors.tint,
+              opacity: !formValid || loading ? 0.5 : 1,
+            },
           ]}
           onPress={onSubmit}
           disabled={!formValid || loading}
         >
-          {loading ? <ActivityIndicator color={colors.bg} /> : (
+          {loading ? (
+            <ActivityIndicator color={colors.bg} />
+          ) : (
             <Text style={[styles.btnText, { color: colors.bg }]}>Sign in</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.row}>
-          <TouchableOpacity onPress={() => setRemember((r) => !r)} style={styles.checkboxRow}>
+          <TouchableOpacity
+            onPress={() => setRemember((r) => !r)}
+            style={styles.checkboxRow}
+          >
             <View
               style={[
                 styles.checkbox,
-                { borderColor: colors.border, backgroundColor: remember ? colors.fg : "transparent" },
+                {
+                  borderColor: colors.border,
+                  backgroundColor: remember ? colors.fg : "transparent",
+                },
               ]}
             />
             <Text style={{ marginLeft: 8, color: colors.fg }}>Remember me</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => Alert.alert("Forgot password", "Stub for testing")}>
-            <Text style={[styles.link, { color: colors.fg }]}>Forgot?</Text>
+          <TouchableOpacity onPress={() => {}}>
+            <Link href="/(auth)/forgot-password" asChild>
+              <Text style={[styles.link, { color: colors.fg }]}>Forgot?</Text>
+            </Link>
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 16 }} />
-        <Link href="/(tabs)/browse" style={[styles.secondaryLink, { color: colors.fg }]}>
-          Continue without login →
-        </Link>
+        <View style={{ marginTop: 12, alignItems: "center" }}>
+          <Text style={{ color: colors.muted }}>No account?</Text>
+          <Link
+            href="/(auth)/signup"
+            style={[styles.secondaryLink, { color: colors.fg }]}
+          >
+            Create one →
+          </Link>
+        </View>
 
         <View
           style={[
@@ -160,24 +197,16 @@ export default function LoginScreen() {
             { borderColor: colors.border, backgroundColor: colors.card },
           ]}
         >
-          <Text style={[{ fontWeight: "600", marginBottom: 6, color: colors.fg }]}>
+          <Text
+            style={[{ fontWeight: "600", marginBottom: 6, color: colors.fg }]}
+          >
             Demo credentials
           </Text>
-          <Text
-            style={[
-              styles.mono,
-              { color: colors.fg },
-            ]}
-          >
+          <Text style={[styles.mono, { color: colors.fg }]}>
             email: {MOCK_USER.email}
           </Text>
-          <Text
-            style={[
-              styles.mono,
-              { color: colors.fg },
-            ]}
-          >
-            pass:  {MOCK_USER.password}
+          <Text style={[styles.mono, { color: colors.fg }]}>
+            pass: {MOCK_USER.password}
           </Text>
         </View>
       </View>
@@ -205,11 +234,22 @@ const styles = StyleSheet.create({
   err: { marginTop: 8 },
   btn: { padding: 14, borderRadius: 12, alignItems: "center", marginTop: 18 },
   btnText: { fontWeight: "700", fontSize: 16 },
-  row: { marginTop: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  row: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   checkboxRow: { flexDirection: "row", alignItems: "center" },
   checkbox: { width: 18, height: 18, borderRadius: 4, borderWidth: 1 },
   link: { textDecorationLine: "underline", fontWeight: "600" },
-  secondaryLink: { textDecorationLine: "underline", marginTop: 8, alignSelf: "center" },
+  secondaryLink: {
+    textDecorationLine: "underline",
+    marginTop: 8,
+    alignSelf: "center",
+  },
   card: { marginTop: 22, padding: 12, borderRadius: 12, borderWidth: 1 },
-  mono: { fontFamily: Platform.select({ ios: "Menlo", android: "monospace" }) as any },
+  mono: {
+    fontFamily: Platform.select({ ios: "Menlo", android: "monospace" }) as any,
+  },
 });

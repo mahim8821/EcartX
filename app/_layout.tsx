@@ -3,7 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { CartProvider } from "../lib/cart";
 import { ThemeProvider } from "../lib/theme";
 
-function RootNav() {
+/* function RootNav() {
   const { colors } = useTheme();
   return (
     <>
@@ -18,7 +18,7 @@ function RootNav() {
       />
     </>
   );
-}
+} */
 //export const unstable_settings = {
 //initialRouteName: "splash",
 //};
@@ -32,6 +32,7 @@ export default function RootLayout() {
           <Stack.Screen name="splash" options={{ headerShown: false }} />
           <Stack.Screen name="promo" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack>
       </CartProvider>
     </ThemeProvider>
