@@ -1,3 +1,4 @@
+// app/(tabs)/menu.tsx
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -21,7 +22,7 @@ const LANGS = ["English", "বাংলা", "हिंदी", "العربية"
 
 export default function MenuScreen() {
   const router = useRouter();
-  const { dark, toggle, colors } = useTheme(); // ✅ global theme
+  const { dark, toggle, colors } = useTheme();
 
   const [language, setLanguage] = useState<string>(LANGS[0]);
   const [langOpen, setLangOpen] = useState(false);
@@ -61,12 +62,19 @@ export default function MenuScreen() {
 
   const logout = () => {
     Alert.alert("Logged out", "You have been signed out (demo).");
-    router.push("/login");
+    router.push("/(auth)/login");
   };
 
   return (
     <SafeAreaView style={[styles.safe, bg]}>
-      <Stack.Screen options={{ title: "Menu" }} />
+      <Stack.Screen
+        options={{
+          title: "Menu",
+          headerStyle: { backgroundColor: colors.bg },
+          headerTitleStyle: { color: colors.fg },
+          headerTintColor: colors.fg,
+        }}
+      />
       <ScrollView contentContainerStyle={styles.container}>
         {/* Device settings */}
         <Pressable
@@ -81,6 +89,7 @@ export default function MenuScreen() {
             color={mut.color as string}
           />
         </Pressable>
+
         {/* Appearance */}
         <View style={[styles.card, cardBg]}>
           <Text style={[styles.sectionTitle, fg]}>Appearance</Text>
@@ -138,10 +147,74 @@ export default function MenuScreen() {
           </View>
         </View>
 
-        {/* Auth */}
+        {/* Orders */}
+        <View style={[styles.card, cardBg]}>
+          <Text style={[styles.sectionTitle, fg]}>Your orders</Text>
+          <View style={{ gap: 10 }}>
+            {[
+              // { id: "o123", title: "Sneakers", status: "Delivered" },
+              //{ id: "o124", title: "Headphones", status: "Processing" },
+            ].map((o) => (
+              <View
+                key={o.id}
+                style={{
+                  padding: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  backgroundColor: colors.card,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: colors.fg, fontWeight: "700" }}>
+                    {o.title}
+                  </Text>
+                  <Text style={{ color: colors.muted }}>
+                    #{o.id} • {o.status}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+          <Pressable
+            style={styles.primaryBtn}
+            onPress={() => router.push("/orders")} // 👈 go to the new page
+          >
+            <Text style={styles.primaryText}>View all orders →</Text>
+          </Pressable>
+        </View>
+
+        {/* NEW: link to Help & Feedback page */}
+        <Pressable
+          style={[styles.row, styles.card, cardBg]}
+          onPress={() => router.push("/help-feedback")}
+        >
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={22}
+            color={mut.color as string}
+          />
+          <Text style={[styles.rowText, fg]}>Help & feedback</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={mut.color as string}
+          />
+        </Pressable>
+
+        {/* Account actions */}
         <View style={[styles.card, cardBg]}>
           <Text style={[styles.sectionTitle, fg]}>Account</Text>
-          <Pressable style={styles.row} onPress={() => router.push("/login")}>
+          <Pressable
+            style={styles.row}
+            onPress={() => router.push("/(auth)/login")}
+          >
             <Ionicons
               name="log-in-outline"
               size={20}
@@ -160,14 +233,6 @@ export default function MenuScreen() {
             <Text style={styles.dangerText}>Log out</Text>
           </Pressable>
         </View>
-
-        {/* Direct nav to Browse */}
-        <Pressable
-          style={styles.primaryBtn}
-          onPress={() => router.push("/(tabs)/browse")}
-        >
-          <Text style={styles.primaryText}>Browse Prducts →</Text>
-        </Pressable>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -222,14 +287,17 @@ export default function MenuScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { padding: 16, gap: 14 },
+
   card: { borderWidth: 1, borderRadius: 14, padding: 14, gap: 12 },
   sectionTitle: { fontSize: 16, fontWeight: "700" },
+
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   rowText: { flex: 1, marginLeft: 10, fontSize: 16, fontWeight: "500" },
+
   input: {
     flex: 1,
     borderWidth: 1,
@@ -237,6 +305,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: Platform.OS === "ios" ? 10 : 6,
   },
+
   primaryBtn: {
     marginTop: 4,
     backgroundColor: "black",
@@ -248,6 +317,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   primaryText: { color: "white", fontWeight: "700" },
+
   smallBtn: {
     backgroundColor: "#111",
     paddingHorizontal: 12,
@@ -255,6 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   smallText: { color: "white", fontWeight: "700" },
+
   dangerBtn: {
     marginTop: 8,
     backgroundColor: "#ef4444",
@@ -266,6 +337,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dangerText: { color: "white", fontWeight: "700" },
+
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)" },
   modalSheet: {
     padding: 16,

@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useTheme } from "../../lib/theme";
 
-type TabKey = "info" | "address" | "orders" | "help" | "care" | "feedback";
+type TabKey = "info" | "address";
 
 export default function AccountScreen() {
   const { colors } = useTheme();
@@ -61,10 +61,6 @@ export default function AccountScreen() {
       >
         {tab === "info" && <AccountInfo colors={colors} />}
         {tab === "address" && <AddressSection colors={colors} />}
-        {tab === "orders" && <OrdersSection colors={colors} />}
-        {tab === "help" && <HelpCenter colors={colors} />}
-        {tab === "care" && <CustomerCare colors={colors} />}
-        {tab === "feedback" && <FeedbackSection colors={colors} />}
       </ScrollView>
     </View>
   );
@@ -79,10 +75,6 @@ const SEGMENTS: {
 }[] = [
   { key: "info", label: "Info", icon: "person-circle-outline" },
   { key: "address", label: "Address", icon: "home-outline" },
-  { key: "orders", label: "Orders", icon: "bag-handle-outline" },
-  { key: "help", label: "Help", icon: "help-circle-outline" },
-  { key: "care", label: "Care", icon: "call-outline" },
-  { key: "feedback", label: "Feedback", icon: "chatbubble-ellipses-outline" },
 ];
 
 function MiniTab({
@@ -98,7 +90,6 @@ function MiniTab({
   onPress: () => void;
   colors: any;
 }) {
-  // super compact pill
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -120,7 +111,7 @@ function MiniTab({
         style={{
           color: active ? colors.bg : colors.fg,
           fontWeight: "700",
-          fontSize: 12, // smaller label
+          fontSize: 12,
         }}
         numberOfLines={1}
       >
@@ -130,7 +121,7 @@ function MiniTab({
   );
 }
 
-/* ------------------ Sections ------------------ */
+/* ------------------ Shared bits ------------------ */
 
 function Row({
   icon,
@@ -342,129 +333,8 @@ function AddressSection({ colors }: any) {
   );
 }
 
-/* 3) Orders (demo list) */
-function OrdersSection({ colors }: any) {
-  return (
-    <View style={{ gap: 10 }}>
-      <Text style={{ color: colors.muted }}>
-        Recent orders will show here. (Wire to backend later.)
-      </Text>
-      {[
-        { id: "o123", title: "Sneakers", status: "Delivered" },
-        { id: "o124", title: "Headphones", status: "Processing" },
-      ].map((o) => (
-        <View
-          key={o.id}
-          style={{
-            padding: 12,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: colors.border,
-            backgroundColor: colors.card,
-          }}
-        >
-          <Text style={{ color: colors.fg, fontWeight: "700" }}>{o.title}</Text>
-          <Text style={{ color: colors.muted }}>
-            Order #{o.id} • {o.status}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-/* 4) Help Center */
-function HelpCenter({ colors }: any) {
-  return (
-    <View style={{ gap: 10 }}>
-      <Text style={{ color: colors.muted }}>
-        FAQs, returns policy, delivery info — put your help content here.
-      </Text>
-      <TouchableOpacity
-        style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
-        onPress={() => Alert.alert("Help Center", "Open help articles (demo).")}
-      >
-        <Text style={{ color: colors.bg, fontWeight: "700" }}>View FAQs</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-/* 5) Customer Care */
-function CustomerCare({ colors }: any) {
-  return (
-    <View style={{ gap: 10 }}>
-      <Text style={{ color: colors.muted }}>
-        Need support? Reach our team via email or phone.
-      </Text>
-      <View style={{ gap: 8 }}>
-        <Row icon="mail" label="Email" colors={colors}>
-          <Text style={{ color: colors.fg }}>support@ecartx.app</Text>
-        </Row>
-        <Row icon="call" label="Phone" colors={colors}>
-          <Text style={{ color: colors.fg }}>+880-1-2345-6789</Text>
-        </Row>
-      </View>
-    </View>
-  );
-}
-
-/* 6) Feedback */
-function FeedbackSection({ colors }: any) {
-  const [text, setText] = useState("");
-
-  return (
-    <View style={{ gap: 10 }}>
-      <Text style={{ color: colors.muted }}>
-        Tell us what to improve. We’re listening!
-      </Text>
-      <TextInput
-        value={text}
-        onChangeText={setText}
-        multiline
-        placeholder="Write your feedback…"
-        placeholderTextColor={colors.muted}
-        style={[
-          styles.input,
-          {
-            minHeight: 120,
-            textAlignVertical: "top",
-            borderColor: colors.border,
-            backgroundColor: colors.card,
-            color: colors.fg,
-          },
-        ]}
-      />
-      <TouchableOpacity
-        style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
-        onPress={() => {
-          setText("");
-          Alert.alert("Thanks! 🫶", "Feedback submitted (demo).");
-        }}
-      >
-        <Text style={{ color: colors.bg, fontWeight: "700" }}>
-          Submit feedback
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  input: {
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-  },
-  smallBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  primaryBtn: {
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: "center",
-  },
+  input: { borderWidth: 1, borderRadius: 10, padding: 12, fontSize: 16 },
+  smallBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
+  primaryBtn: { paddingVertical: 12, borderRadius: 12, alignItems: "center" },
 });
