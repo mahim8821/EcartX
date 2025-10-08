@@ -1,5 +1,4 @@
 // app/(tabs)/cart.tsx
-import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React from "react";
 import {
@@ -22,6 +21,7 @@ export default function CartScreen() {
   const fg = { color: colors.fg };
   const mut = { color: colors.muted };
   const cardBg = { backgroundColor: colors.card, borderColor: colors.border };
+  const goBrowse = () => router.replace("/(tabs)/browse");
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -91,36 +91,23 @@ export default function CartScreen() {
                   <Text style={styles.primaryText}>Browse Products →</Text>
                 </Pressable> } */}
                 <TouchableOpacity onPress={() => remove(item.id)}>
-                  <Text style={{ color: "#ef4444" }}>Remove</Text>
+                  <Text style={{ color: "#ef4444", fontWeight: "700" }}>
+                    Remove
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
           />
-          <View style={[styles.card, cardBg]}>
-            <Pressable
-              style={styles.row}
-              onPress={() => router.push("/(tabs)/browse")}
-            >
-              <Ionicons
-                name="log-in-outline"
-                size={20}
-                color={mut.color as string}
-              />
-              <Text style={[styles.rowText, fg]}>Browse Product</Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={mut.color as string}
-              />
-            </Pressable>
-          </View>
+          <Pressable style={styles.continue} onPress={goBrowse}>
+            <Text style={styles.continueText}>Browse More Products</Text>
+          </Pressable>
 
           <View style={[styles.footer, { borderTopColor: colors.border }]}>
             <Text style={{ color: colors.fg, fontSize: 16, fontWeight: "700" }}>
               Total: ${totalPrice.toFixed(2)}
             </Text>
             <TouchableOpacity
-              onPress={() => router.push("/payment")} // 👈 navigate to Payment
+              onPress={() => router.push("/payment")} // navigate to Payment
               style={[styles.checkoutBtn, { backgroundColor: colors.tint }]}
             >
               <Text style={{ color: colors.bg, fontWeight: "700" }}>
@@ -157,6 +144,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  continue: {
+    margin: 12,
+    paddingVertical: 14,
+    borderRadius: 24,
+    alignItems: "center",
+    backgroundColor: "#09484fff",
+  },
+  continueText: { color: "white", fontWeight: "700", fontSize: 16 },
+  primaryBtn: {
+    marginTop: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    backgroundColor: "#4F46E5",
   },
   footer: {
     padding: 12,
