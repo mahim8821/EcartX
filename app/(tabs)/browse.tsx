@@ -1,96 +1,124 @@
 // app/(tabs)/browse.tsx
+import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   FlatList,
   Image,
-  ImageSourcePropType,
+  Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { useCart } from "../../lib/cart";
+import { PRODUCTS, Product } from "../../lib/products";
 import { useTheme } from "../../lib/theme";
 
-type Product = {
-  id: string;
-  title: string;
-  price: number;
-  image: ImageSourcePropType;
-  rating?: number;
+/* ----------------------- Types & constants ----------------------- */
+
+type CatKey =
+  | "all"
+  | "fashion"
+  | "electronics"
+  | "home"
+  | "medical"
+  | "medical_medicine"
+  | "medical_sanitary"
+  | "medical_device";
+
+const CATEGORIES: { key: CatKey; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "fashion", label: "Fashion" },
+  { key: "electronics", label: "Electronics" },
+  { key: "home", label: "Home" },
+  { key: "medical", label: "Medical" },
+];
+
+const MED_SUBS: { key: CatKey; label: string }[] = [
+  { key: "medical_medicine", label: "Medicine" },
+  { key: "medical_sanitary", label: "Sanitary" },
+  { key: "medical_device", label: "Devices" },
+];
+
+type SortKey = "popular" | "price_low" | "price_high" | "discount";
+const SORT_LABEL: Record<SortKey, string> = {
+  popular: "Popular",
+  price_low: "Price ↑",
+  price_high: "Price ↓",
+  discount: "Discount",
 };
 
-const PRODUCTS: Product[] = [
-  {
-    id: "p1",
-    title: "Classic T-Shirt",
-    price: 19.99,
-    image: require("../../assets/images/tshirt.png"),
-    rating: 4.5,
-  },
-  {
-    id: "p2",
-    title: "Sneakers",
-    price: 59.0,
-    image: require("../../assets/images/sneakers.jpg"),
-    rating: 4.2,
-  },
-  {
-    id: "p3",
-    title: "Backpack",
-    price: 29.5,
-    image: require("../../assets/images/backpack.jpeg"),
-    rating: 4.7,
-  },
-  {
-    id: "p4",
-    title: "Headphones",
-    price: 89.0,
-    image: require("../../assets/images/Headphones.jpeg"),
-    rating: 4.1,
-  },
-  {
-    id: "p5",
-    title: "Watch",
-    price: 120.0,
-    image: require("../../assets/images/watchs.webp"),
-    rating: 4.8,
-  },
-  {
-    id: "p6",
-    title: "Sunglasses",
-    price: 25.0,
-    image: require("../../assets/images/sunglasses.jpg"),
-    rating: 4.0,
-  },
-  {
-    id: "p7",
-    title: "Hoodie",
-    price: 39.0,
-    image: require("../../assets/images/hoodie.jpg"),
-    rating: 4.4,
-  },
-  {
-    id: "p8",
-    title: "Cap",
-    price: 14.0,
-    image: require("../../assets/images/cap.jpeg"),
-    rating: 3.9,
-  },
-];
+/* ----------------------- Price helpers ----------------------- */
+
+function finalPrice(p: Product) {
+  if (!p.offer) return p.price;
+  if (p.offer.type === "percent")
+    return +(p.price * (1 - p.offer.value / 100)).toFixed(2);
+  return Math.max(0, +(p.price - p.offer.value).toFixed(2));
+}
+function discountPct(p: Product) {
+  if (!p.offer) return 0;
+  return p.offer.type === "percent"
+    ? p.offer.value
+    : Math.round((p.offer.value / p.price) * 100);
+}
+
+/* ============================== Screen ============================== */
 
 export default function BrowseScreen() {
   const { colors } = useTheme();
   const { add } = useCart();
-  const [q, setQ] = useState("");
 
-  const data = useMemo(() => {
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState<CatKey>("all");
+  const [medSub, setMedSub] = useState<CatKey>("medical_medicine");
+  const [sort, setSort] = useState<SortKey>("popular");
+
+  // Featured deals for carousel
+  const deals = useMemo(
+    () => PRODUCTS.filter((p) => discountPct(p) >= 15).slice(0, 10),
+    []
+  );
+
+  // Filter + search + sort
+  const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    if (!term) return PRODUCTS;
-    return PRODUCTS.filter((p) => p.title.toLowerCase().includes(term));
-  }, [q]);
+    let items = PRODUCTS;
+
+    // Category
+    if (cat !== "all" && cat !== "medical") {
+      items = items.filter((p) => p.categories.includes(cat as any));
+    }
+    if (cat === "medical") {
+      items = items.filter((p) =>
+        p.categories.some((c) => c.startsWith("medical"))
+      );
+      if (medSub)
+        items = items.filter((p) => p.categories.includes(medSub as any));
+    }
+
+    // Search
+    if (term) {
+      items = items.filter(
+        (p) =>
+          p.title.toLowerCase().includes(term) ||
+          (p.brand ?? "").toLowerCase().includes(term)
+      );
+    }
+
+    // Sort
+    const cmp = {
+      popular: (a: Product, b: Product) => (b.rating ?? 0) - (a.rating ?? 0),
+      price_low: (a: Product, b: Product) => finalPrice(a) - finalPrice(b),
+      price_high: (a: Product, b: Product) => finalPrice(b) - finalPrice(a),
+      discount: (a: Product, b: Product) => discountPct(b) - discountPct(a),
+    }[sort];
+
+    return [...items].sort(cmp);
+  }, [q, cat, medSub, sort]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -98,165 +126,413 @@ export default function BrowseScreen() {
         options={{
           title: "EcartX",
           headerStyle: { backgroundColor: colors.bg },
-          headerTitleStyle: {
-            color: colors.fg,
-            fontWeight: "800",
-            letterSpacing: 0.3,
-          },
+          headerTitleStyle: { color: colors.fg },
           headerTintColor: colors.fg,
         }}
       />
 
-      {/* Search pill */}
-      <View style={styles.searchRow}>
+      {/* Search + Sort */}
+      <View style={{ flexDirection: "row", gap: 8, padding: 12 }}>
         <TextInput
           value={q}
           onChangeText={setQ}
           placeholder="Search products…"
-          autoCapitalize="none"
+          placeholderTextColor={colors.muted}
           style={[
-            styles.search,
+            styles.input,
             {
+              flex: 1,
               borderColor: colors.border,
-              color: colors.fg,
               backgroundColor: colors.card,
+              color: colors.fg,
             },
           ]}
-          placeholderTextColor={colors.muted}
           clearButtonMode="while-editing"
         />
+
+        <SortButton sort={sort} onChange={setSort} />
       </View>
 
+      {/* Category chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          gap: 10,
+          alignItems: "center",
+        }}
+        style={{
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderColor: colors.border,
+        }}
+      >
+        {CATEGORIES.map((c) => (
+          <ChipBtn
+            key={c.key}
+            label={c.label}
+            active={cat === c.key}
+            onPress={() => setCat(c.key)}
+            colors={colors}
+          />
+        ))}
+      </ScrollView>
+
+      {/* Medical sub chips */}
+      {cat === "medical" && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            gap: 8,
+            alignItems: "center",
+          }}
+        >
+          {MED_SUBS.map((m) => (
+            <ChipBtn
+              key={m.key}
+              label={m.label}
+              active={medSub === m.key}
+              onPress={() => setMedSub(m.key)}
+              small
+              colors={colors}
+            />
+          ))}
+        </ScrollView>
+      )}
+
+      {/* Featured deals carousel */}
+      {deals.length > 0 && (
+        <View style={{ paddingTop: 8 }}>
+          <Text
+            style={{
+              color: colors.fg,
+              fontWeight: "700",
+              paddingHorizontal: 12,
+              marginBottom: 6,
+            }}
+          >
+            Featured deals
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 12, gap: 12 }}
+          >
+            {deals.map((p) => (
+              <View
+                key={"deal-" + p.id}
+                style={[
+                  styles.dealCard,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                ]}
+              >
+                {!!discountPct(p) && (
+                  <View
+                    style={[styles.ribbon, { backgroundColor: colors.tint }]}
+                  >
+                    <Text
+                      style={{
+                        color: colors.bg,
+                        fontWeight: "700",
+                        fontSize: 12,
+                      }}
+                    >
+                      -{discountPct(p)}%
+                    </Text>
+                  </View>
+                )}
+                <Image source={p.image} style={styles.dealImg} />
+                <Text
+                  style={{ color: colors.fg, fontWeight: "700" }}
+                  numberOfLines={1}
+                >
+                  {p.title}
+                </Text>
+                <PriceLine colors={colors} p={p} />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Product grid */}
       <FlatList
-        data={data}
-        keyExtractor={(item) => String(item.id)}
+        data={filtered}
+        keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={{ gap: 12, paddingHorizontal: 12 }}
-        contentContainerStyle={{
-          paddingVertical: 12,
-          gap: 12,
-          paddingBottom: 20,
-        }}
+        contentContainerStyle={{ paddingVertical: 12, gap: 12 }}
         ListHeaderComponent={
-          <Text style={[styles.count, { color: colors.muted }]}>
-            {data.length} of {PRODUCTS.length} items
+          <Text style={{ color: colors.muted, paddingHorizontal: 12 }}>
+            {filtered.length} of {PRODUCTS.length} items
           </Text>
         }
         renderItem={({ item }) => (
           <View
             style={[
               styles.card,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-                // subtle shadow (iOS) + elevation (Android)
-                shadowColor: "#000",
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 4 },
-                elevation: 2,
-              },
+              { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            {/* Image area with price chip */}
-            <Pressable style={styles.imageWrap}>
-              <Image
-                source={item.image}
-                style={styles.image}
-                resizeMode="cover"
-              />
-              <View style={styles.priceChip}>
-                <Text style={styles.priceChipText}>
-                  ${item.price.toFixed(2)}
+            {!!discountPct(item) && (
+              <View style={[styles.ribbon, { backgroundColor: colors.tint }]}>
+                <Text
+                  style={{ color: colors.bg, fontWeight: "700", fontSize: 12 }}
+                >
+                  -{discountPct(item)}%
                 </Text>
               </View>
+            )}
+            <Image source={item.image} style={styles.image} />
+            <Text
+              style={{
+                color: colors.fg,
+                fontWeight: "700",
+                paddingHorizontal: 10,
+              }}
+              numberOfLines={1}
+            >
+              {item.title}
+            </Text>
+            <PriceLine colors={colors} p={item} />
+            <Pressable
+              onPress={() =>
+                add(
+                  {
+                    id: item.id,
+                    title: item.title,
+                    price: item.price,
+                    image: item.image,
+                  },
+                  1
+                )
+              }
+              style={[styles.addBtn, { backgroundColor: colors.tint }]}
+            >
+              <Text style={{ color: colors.bg, fontWeight: "700" }}>
+                Add to Cart
+              </Text>
             </Pressable>
-
-            {/* Meta */}
-            <View style={{ padding: 10 }}>
-              <Text
-                style={[styles.title, { color: colors.fg }]}
-                numberOfLines={1}
-              >
-                {item.title}
-              </Text>
-              <Text style={[styles.rating, { color: colors.muted }]}>
-                {stars(item.rating ?? 4)} ({(item.rating ?? 4).toFixed(1)})
-              </Text>
-
-              {/* CTA */}
-              <Pressable
-                onPress={() =>
-                  add(
-                    {
-                      id: item.id,
-                      title: item.title,
-                      price: item.price,
-                      image: item.image,
-                    },
-                    1
-                  )
-                }
-                style={[styles.addBtn, { backgroundColor: colors.tint }]}
-              >
-                <Text style={{ color: colors.bg, fontWeight: "700" }}>
-                  Add to Cart
-                </Text>
-              </Pressable>
-            </View>
           </View>
         )}
-        keyboardShouldPersistTaps="handled"
       />
     </View>
   );
 }
 
-function stars(rating: number) {
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5 ? 1 : 0;
+/* ----------------------- Small UI pieces ----------------------- */
+
+function ChipBtn({
+  label,
+  active,
+  onPress,
+  small,
+  colors,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  small?: boolean;
+  colors: any;
+}) {
+  const HEIGHT = small ? 32 : 36;
+  const MIN_W = small ? 90 : 100;
+
   return (
-    "★".repeat(full) +
-    (half ? "½" : "") +
-    "☆".repeat(Math.max(0, 5 - full - half))
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        {
+          height: HEIGHT,
+          minWidth: MIN_W,
+          paddingHorizontal: 14,
+          borderRadius: HEIGHT / 2,
+          borderWidth: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: active ? colors.fg : "transparent",
+          borderColor: active ? colors.fg : colors.border,
+          opacity: pressed ? 0.9 : 1,
+        },
+      ]}
+    >
+      <Text
+        numberOfLines={1}
+        style={{
+          fontWeight: "700",
+          fontSize: 14,
+          color: active ? colors.bg : colors.fg,
+          textAlign: "center",
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
+function PriceLine({ p, colors }: { p: Product; colors: any }) {
+  const fp = finalPrice(p);
+  const hasDiscount = fp !== p.price;
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 10,
+        marginTop: 4,
+      }}
+    >
+      <Text style={{ color: colors.fg, fontSize: 16, fontWeight: "700" }}>
+        ${fp.toFixed(2)}
+      </Text>
+      {hasDiscount && (
+        <Text
+          style={{ color: colors.muted, textDecorationLine: "line-through" }}
+        >
+          ${p.price.toFixed(2)}
+        </Text>
+      )}
+    </View>
+  );
+}
+
+/* ----------------------- Sort Button + Menu ----------------------- */
+
+function SortButton({
+  sort,
+  onChange,
+}: {
+  sort: SortKey;
+  onChange: (s: SortKey) => void;
+}) {
+  const { colors } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Pressable
+        onPress={() => setOpen(true)}
+        style={({ pressed }) => [
+          styles.sortBtn,
+          {
+            borderColor: colors.border,
+            backgroundColor: colors.card,
+            opacity: pressed ? 0.9 : 1,
+          },
+        ]}
+      >
+        <Ionicons name="swap-vertical-outline" size={18} color={colors.fg} />
+        <Text style={{ color: colors.fg, marginLeft: 6, fontWeight: "600" }}>
+          Sort
+        </Text>
+        <Text style={{ marginLeft: 6, color: colors.muted }}>
+          {SORT_LABEL[sort]}
+        </Text>
+      </Pressable>
+
+      <Modal
+        visible={open}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setOpen(false)}
+      >
+        <Pressable style={styles.sheetBackdrop} onPress={() => setOpen(false)}>
+          <View />
+        </Pressable>
+        <View
+          style={[
+            styles.sheetBox,
+            { backgroundColor: colors.card, borderColor: colors.border },
+          ]}
+        >
+          {(Object.keys(SORT_LABEL) as SortKey[]).map((key) => {
+            const active = sort === key;
+            return (
+              <Pressable
+                key={key}
+                onPress={() => {
+                  onChange(key);
+                  setOpen(false);
+                }}
+                style={[
+                  styles.sheetItem,
+                  active && { backgroundColor: colors.tint + "22" },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: active ? colors.tint : colors.fg,
+                    fontWeight: active ? ("700" as const) : ("500" as const),
+                  }}
+                >
+                  {SORT_LABEL[key]}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </Modal>
+    </>
+  );
+}
+
+/* ----------------------- Styles ----------------------- */
+
 const styles = StyleSheet.create({
-  searchRow: { paddingHorizontal: 12, paddingTop: 12 },
-  search: {
+  input: { borderWidth: 1, borderRadius: 15, padding: 12, fontSize: 16 },
+  sortBtn: {
+    height: 42,
+    minWidth: 120,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 22, // pill
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    fontSize: 16,
-  },
-  count: { paddingHorizontal: 12, paddingTop: 8 },
-  card: {
-    flex: 1,
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  imageWrap: { aspectRatio: 1.15, backgroundColor: "#00000010" },
-  image: { width: "100%", height: "100%" },
-  priceChip: {
-    position: "absolute",
-    top: 10,
-    left: 10,
-    backgroundColor: "rgba(0,0,0,0.65)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  priceChipText: { color: "#fff", fontWeight: "800", fontSize: 12 },
-  title: { fontWeight: "700", fontSize: 16 },
-  rating: { marginTop: 2, marginBottom: 10 },
-  addBtn: {
-    marginTop: 6,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  dealImg: { width: "100%", height: 100, backgroundColor: "#00000010" },
+  card: { flex: 1, borderRadius: 14, borderWidth: 1, overflow: "hidden" },
+  image: { width: "100%", height: 140, backgroundColor: "#00000010" },
+  addBtn: {
+    margin: 10,
     paddingVertical: 10,
     borderRadius: 10,
+    alignItems: "center",
+  },
+  ribbon: {
+    position: "absolute",
+    left: 8,
+    top: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 6,
+    zIndex: 2,
+  },
+  dealCard: { width: 160, borderRadius: 14, borderWidth: 1, padding: 10 },
+
+  // sort sheet
+  sheetBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)" },
+  sheetBox: {
+    position: "absolute",
+    right: 12,
+    top: 105, // tweak if needed
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: "hidden",
+    minWidth: 170,
+  },
+  sheetItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#e5e5e5",
   },
 });
