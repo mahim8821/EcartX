@@ -1,11 +1,5 @@
 // lib/cart.tsx
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import React, { createContext, useMemo, useState, type ReactNode } from "react";
 import { ImageSourcePropType } from "react-native";
 
 export type CartItem = {
@@ -78,8 +72,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
-export function useCart() {
+/* export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used within <CartProvider>");
+  return ctx;
+}
+ */
+// in lib/cart.tsx (bottom)
+export function useCart() {
+  const ctx = React.useContext(CartContext);
+  if (!ctx) throw new Error("CartContext missing");
   return ctx;
 }

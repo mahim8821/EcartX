@@ -1,8 +1,9 @@
 // app/(tabs)/browse.tsx
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { Stack, router } from "expo-router";
+import React, { useMemo, useRef, useState } from "react";
 import {
+  Animated,
   FlatList,
   Image,
   Modal,
@@ -68,6 +69,9 @@ function discountPct(p: Product) {
 
 /* ============================== Screen ============================== */
 
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Product>);
+const FEATURED_H = 220; // total height for the Featured block (title + carousel). Tweak if needed.
+
 export default function BrowseScreen() {
   const { colors } = useTheme();
   const { add } = useCart();
@@ -77,7 +81,35 @@ export default function BrowseScreen() {
   const [medSub, setMedSub] = useState<CatKey>("medical_medicine");
   const [sort, setSort] = useState<SortKey>("popular");
 
-  // Featured deals for carousel
+  // Animated scroll value
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Interpolations for the Featured section
+  const collapse = scrollY.interpolate({
+    inputRange: [0, 40, 140], // start hiding quickly, fully hidden by ~140px
+    outputRange: [0, 0.5, 1], // 0 = open, 1 = collapsed
+    extrapolate: "clamp",
+  });
+
+  const featuredHeight = collapse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [FEATURED_H, 0],
+    extrapolate: "clamp",
+  });
+
+  const featuredOpacity = collapse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
+  const featuredTranslateY = collapse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -20], // subtle slide up
+    extrapolate: "clamp",
+  });
+
+  // Featured deals
   const deals = useMemo(
     () => PRODUCTS.filter((p) => discountPct(p) >= 15).slice(0, 10),
     []
@@ -205,63 +237,89 @@ export default function BrowseScreen() {
         </ScrollView>
       )}
 
-      {/* Featured deals carousel */}
-      {deals.length > 0 && (
-        <View style={{ paddingTop: 8 }}>
-          <Text
-            style={{
-              color: colors.fg,
-              fontWeight: "700",
-              paddingHorizontal: 12,
-              marginBottom: 6,
-            }}
-          >
-            Featured deals
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 12, gap: 12 }}
-          >
-            {deals.map((p) => (
-              <View
-                key={"deal-" + p.id}
-                style={[
-                  styles.dealCard,
-                  { backgroundColor: colors.card, borderColor: colors.border },
-                ]}
-              >
-                {!!discountPct(p) && (
-                  <View
-                    style={[styles.ribbon, { backgroundColor: colors.tint }]}
-                  >
-                    <Text
-                      style={{
-                        color: colors.bg,
-                        fontWeight: "700",
-                        fontSize: 12,
-                      }}
-                    >
-                      -{discountPct(p)}%
-                    </Text>
-                  </View>
-                )}
-                <Image source={p.image} style={styles.dealImg} />
-                <Text
-                  style={{ color: colors.fg, fontWeight: "700" }}
-                  numberOfLines={1}
+      {/* Animated Featured deals */}
+      <Animated.View
+        style={{
+          height: featuredHeight,
+          opacity: featuredOpacity,
+          transform: [{ translateY: featuredTranslateY }],
+          overflow: "hidden",
+          paddingTop: 8,
+        }}
+        pointerEvents="box-none"
+      >
+        {deals.length > 0 && (
+          <View>
+            <Text
+              style={{
+                color: colors.fg,
+                fontWeight: "700",
+                paddingHorizontal: 12,
+                marginBottom: 6,
+              }}
+            >
+              Featured deals
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 12, gap: 12 }}
+            >
+              {deals.map((p) => (
+                <Pressable
+                  key={"deal-" + p.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/product/[id]",
+                      params: { id: p.id },
+                    })
+                  }
+                  style={[
+                    styles.dealCard,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: colors.border,
+                    },
+                  ]}
                 >
-                  {p.title}
-                </Text>
-                <PriceLine colors={colors} p={p} />
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+                  {!!discountPct(p) && (
+                    <View
+                      style={[styles.ribbon, { backgroundColor: colors.tint }]}
+                    >
+                      <Text
+                        style={{
+                          color: colors.bg,
+                          fontWeight: "700",
+                          fontSize: 12,
+                        }}
+                      >
+                        -{discountPct(p)}%
+                      </Text>
+                    </View>
+                  )}
+                  <View style={styles.dealImgBox}>
+                    <Image
+                      source={p.image}
+                      style={styles.img}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <Text
+                    style={{ color: colors.fg, fontWeight: "700" }}
+                    numberOfLines={1}
+                  >
+                    {p.title}
+                  </Text>
+                  <PriceLine colors={colors} p={p} />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </Animated.View>
 
       {/* Product grid */}
-      <FlatList
+      <AnimatedFlatList
         data={filtered}
         keyExtractor={(item) => item.id}
         numColumns={2}
@@ -279,27 +337,50 @@ export default function BrowseScreen() {
               { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
-            {!!discountPct(item) && (
-              <View style={[styles.ribbon, { backgroundColor: colors.tint }]}>
-                <Text
-                  style={{ color: colors.bg, fontWeight: "700", fontSize: 12 }}
-                >
-                  -{discountPct(item)}%
-                </Text>
-              </View>
-            )}
-            <Image source={item.image} style={styles.image} />
-            <Text
-              style={{
-                color: colors.fg,
-                fontWeight: "700",
-                paddingHorizontal: 10,
-              }}
-              numberOfLines={1}
+            {/* pressable top opens details */}
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/product/[id]",
+                  params: { id: item.id },
+                })
+              }
+              style={{ flex: 1 }}
             >
-              {item.title}
-            </Text>
-            <PriceLine colors={colors} p={item} />
+              {!!discountPct(item) && (
+                <View style={[styles.ribbon, { backgroundColor: colors.tint }]}>
+                  <Text
+                    style={{
+                      color: colors.bg,
+                      fontWeight: "700",
+                      fontSize: 12,
+                    }}
+                  >
+                    -{discountPct(item)}%
+                  </Text>
+                </View>
+              )}
+              <View style={styles.imgBox}>
+                <Image
+                  source={item.image}
+                  style={styles.img}
+                  resizeMode="cover"
+                />
+              </View>
+              <Text
+                style={{
+                  color: colors.fg,
+                  fontWeight: "700",
+                  paddingHorizontal: 10,
+                }}
+                numberOfLines={1}
+              >
+                {item.title}
+              </Text>
+              <PriceLine colors={colors} p={item} />
+            </Pressable>
+
+            {/* Add to Cart */}
             <Pressable
               onPress={() =>
                 add(
@@ -320,6 +401,13 @@ export default function BrowseScreen() {
             </Pressable>
           </View>
         )}
+        // Animated scroll handler
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -498,9 +586,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  dealImg: { width: "100%", height: 100, backgroundColor: "#00000010" },
+  // unified image sizing
+  imgBox: {
+    width: "100%",
+    aspectRatio: 1,
+    backgroundColor: "#00000010",
+    overflow: "hidden",
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+  },
+  dealImgBox: {
+    width: 160,
+    aspectRatio: 1.2,
+    backgroundColor: "#00000010",
+    overflow: "hidden",
+    borderRadius: 10,
+  },
+  img: { width: "100%", height: "100%" },
+
   card: { flex: 1, borderRadius: 14, borderWidth: 1, overflow: "hidden" },
-  image: { width: "100%", height: 140, backgroundColor: "#00000010" },
   addBtn: {
     margin: 10,
     paddingVertical: 10,
@@ -516,14 +620,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     zIndex: 2,
   },
-  dealCard: { width: 160, borderRadius: 14, borderWidth: 1, padding: 10 },
+  dealCard: { width: 160, borderRadius: 14, borderWidth: 1, padding: 1 },
 
   // sort sheet
   sheetBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.25)" },
   sheetBox: {
     position: "absolute",
     right: 12,
-    top: 105, // tweak if needed
+    top: 105,
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",

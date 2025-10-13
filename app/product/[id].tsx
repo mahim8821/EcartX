@@ -1,118 +1,408 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import React, { useMemo } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+// app/product/[id].tsx
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useMemo, useState } from "react";
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useCart } from "../../lib/cart";
-import { discountPercent, finalPrice, inStock } from "../../lib/catalog";
-import { PRODUCTS } from "../../lib/products";
+import { PRODUCTS, type Product } from "../../lib/products";
 import { useTheme } from "../../lib/theme";
 
-export default function ProductDetail() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors } = useTheme();
-  const { add } = useCart();
+/* ---- helpers (same as Browse) ---- */
+function finalPrice(p: Product) {
+  if (!p.offer) return p.price;
+  if (p.offer.type === "percent")
+    return +(p.price * (1 - p.offer.value / 100)).toFixed(2);
+  return Math.max(0, +(p.price - p.offer.value).toFixed(2));
+}
+function discountPct(p: Product) {
+  if (!p.offer) return 0;
+  return p.offer.type === "percent"
+    ? p.offer.value
+    : Math.round((p.offer.value / p.price) * 100);
+}
 
-  const p = useMemo(() => PRODUCTS.find((x) => x.id === id), [id]);
-  if (!p)
+type SizeOption = "XS" | "S" | "M" | "L" | "XL";
+
+export default function ProductDetails() {
+  const { colors } = useTheme();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const cart = useCart();
+  const router = useRouter();
+
+  const product = useMemo(() => PRODUCTS.find((p) => p.id === id), [id]);
+
+  if (!product) {
     return (
-      <View>
-        <Text>Not found</Text>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.bg,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Stack.Screen options={{ title: "Detail Product" }} />
+        <Text
+          style={{
+            color: colors.fg,
+            fontWeight: "700",
+            fontSize: 16,
+            marginBottom: 12,
+          }}
+        >
+          Product not found
+        </Text>
+        <Pressable
+          onPress={() => router.back()}
+          style={{
+            paddingHorizontal: 14,
+            paddingVertical: 10,
+            borderRadius: 10,
+            backgroundColor: colors.card,
+          }}
+        >
+          <Text style={{ color: colors.fg }}>Go Back</Text>
+        </Pressable>
       </View>
     );
-  const off = discountPercent(p);
-  const oos = !inStock(p);
+  }
+
+  // Colors: keep defaults if product doesn't define them
+  const colorOptions: string[] = (product as any).colors ?? [
+    "#0f172a",
+    "#1f2937",
+    "#93c5fd",
+    "#e5e7eb",
+  ];
+
+  // ✅ Show sizes ONLY for fashion items
+  const isFashion = product.categories.includes("fashion" as any);
+  const sizeOptions: SizeOption[] = isFashion
+    ? (product as any).sizes ?? (["XS", "S", "M", "L", "XL"] as SizeOption[])
+    : []; // non-fashion → no sizes
+
+  const showSizes = sizeOptions.length > 0;
+
+  const [selectedColor, setSelectedColor] = useState<string>(colorOptions[0]);
+  const [selectedSize, setSelectedSize] = useState<SizeOption | null>(
+    showSizes ? sizeOptions[1] ?? sizeOptions[0] : null
+  );
+  const [qty, setQty] = useState(1);
+
+  const priceNow = finalPrice(product);
+  const hasDiscount = priceNow !== product.price;
+
+  const onAdd = () => {
+    cart.add(
+      {
+        id: product.id,
+        title:
+          showSizes && selectedSize
+            ? `${product.title} (${selectedSize})`
+            : product.title,
+        price: priceNow,
+        image: product.image,
+      },
+      qty
+    );
+    Alert.alert("Added", "Item added to your cart.");
+  };
+
+  const onBuy = () => {
+    onAdd();
+    router.push("/payment");
+  };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Stack.Screen
         options={{
-          title: p.title,
+          title: "Detail Product",
           headerStyle: { backgroundColor: colors.bg },
-          headerTintColor: colors.fg,
           headerTitleStyle: { color: colors.fg },
+          headerTintColor: colors.fg,
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push("/(tabs)/cart")}
+              style={{
+                padding: 6,
+                backgroundColor: colors.card,
+                borderRadius: 999,
+              }}
+            >
+              <Ionicons name="cart-outline" size={18} color={colors.fg} />
+            </Pressable>
+          ),
         }}
       />
 
-      <Image
-        source={p.image}
-        style={{ width: "100%", height: 280, backgroundColor: "#00000010" }}
-      />
-      <View style={{ padding: 16, gap: 8 }}>
-        <Text style={{ color: colors.fg, fontSize: 20, fontWeight: "800" }}>
-          {p.title}
-        </Text>
-        <Text style={{ color: colors.muted }}>
-          Brand: {p.brand ?? "—"} • ★ {(p.rating ?? 0).toFixed(1)}
-        </Text>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "baseline",
-            gap: 8,
-            marginTop: 4,
-          }}
-        >
-          <Text style={{ color: colors.fg, fontWeight: "900", fontSize: 18 }}>
-            ৳{finalPrice(p).toFixed(2)}
-          </Text>
-          {off > 0 && (
-            <Text
-              style={{
-                color: colors.muted,
-                textDecorationLine: "line-through",
-              }}
-            >
-              ৳{p.price.toFixed(2)}
-            </Text>
-          )}
-          {off > 0 && (
-            <Text style={{ color: "#db2777", fontWeight: "800" }}>-{off}%</Text>
-          )}
-        </View>
-
-        {p.categories.some((c) => c.startsWith("medical_")) && (
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+        {/* Image + dots */}
+        <View style={{ backgroundColor: colors.card, padding: 16 }}>
           <View
             style={{
-              padding: 10,
-              borderRadius: 10,
-              backgroundColor: colors.card,
-              borderWidth: 1,
-              borderColor: colors.border,
+              width: "100%",
+              aspectRatio: 1.2, // keeps a consistent hero shape
+              overflow: "hidden",
+              borderRadius: 12,
+              backgroundColor: "#00000010",
             }}
           >
-            <Text style={{ color: colors.muted, fontSize: 12 }}>
-              ⚕️ Medical item: Please follow local regulations and consult a
-              healthcare professional if needed.
+            <Image
+              source={product.image}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="contain" // use "cover" if you prefer edge-to-edge
+            />
+          </View>
+
+          {/* dots */}
+          <View style={styles.dotsWrap}>
+            <View
+              style={[
+                styles.dot,
+                { backgroundColor: colors.border, opacity: 0.6 },
+              ]}
+            />
+            <View style={[styles.dot, { backgroundColor: colors.fg }]} />
+            <View
+              style={[
+                styles.dot,
+                { backgroundColor: colors.border, opacity: 0.6 },
+              ]}
+            />
+          </View>
+        </View>
+
+        {/* Info */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
+          <View style={styles.rowBetween}>
+            <Text style={[styles.brand, { color: colors.muted }]}>
+              {product.brand ?? "—"}
+            </Text>
+            <Pressable onPress={() => {}}>
+              <Ionicons name="heart-outline" size={22} color={colors.fg} />
+            </Pressable>
+          </View>
+
+          <Text style={[styles.title, { color: colors.fg }]}>
+            {product.title}
+          </Text>
+
+          <View style={[styles.row, { gap: 8, marginTop: 4 }]}>
+            <Ionicons name="star" size={14} color="#fbbf24" />
+            <Text style={[styles.rating, { color: colors.fg }]}>
+              {(product.rating ?? 4.8).toFixed(1)}{" "}
+              <Text style={{ color: colors.muted }}>
+                ({product.reviews ?? 120})
+              </Text>
             </Text>
           </View>
-        )}
+
+          <View style={[styles.row, { gap: 10, marginTop: 8 }]}>
+            <Text style={[styles.price, { color: colors.tint }]}>
+              ${priceNow.toFixed(2)}
+            </Text>
+            {hasDiscount && (
+              <Text
+                style={[
+                  styles.oldPrice,
+                  { color: colors.muted, textDecorationLine: "line-through" },
+                ]}
+              >
+                ${product.price.toFixed(2)}
+              </Text>
+            )}
+            {!!discountPct(product) && (
+              <Text style={{ color: colors.tint, fontWeight: "700" }}>
+                -{discountPct(product)}%
+              </Text>
+            )}
+          </View>
+
+          {!!product.description && (
+            <Text
+              style={[
+                styles.desc,
+                { color: colors.fg, opacity: 0.85, marginTop: 10 },
+              ]}
+            >
+              {product.description}
+            </Text>
+          )}
+
+          {/* Colors & Size row */}
+          <View style={{ marginTop: 16 }}>
+            <View style={[styles.rowBetween, { marginBottom: 8 }]}>
+              <Text style={[styles.label, { color: colors.fg }]}>Colors</Text>
+              {showSizes ? (
+                <Text style={[styles.label, { color: colors.fg }]}>Size</Text>
+              ) : (
+                <View />
+              )}
+            </View>
+
+            <View style={[styles.rowBetween, { alignItems: "flex-start" }]}>
+              {/* Colors */}
+              <View
+                style={[styles.row, { gap: 12, flexWrap: "wrap", flex: 1 }]}
+              >
+                {colorOptions.map((c) => {
+                  const selected = c === selectedColor;
+                  return (
+                    <TouchableOpacity
+                      key={c}
+                      onPress={() => setSelectedColor(c)}
+                      style={[
+                        styles.colorDot,
+                        {
+                          borderColor: selected ? colors.tint : colors.border,
+                          borderWidth: selected ? 2 : 1,
+                          backgroundColor: c,
+                        },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+
+              {/* Sizes (only if fashion) */}
+              {showSizes ? (
+                <View style={[styles.row, { gap: 10 }]}>
+                  {sizeOptions.map((s) => {
+                    const selected = s === selectedSize;
+                    return (
+                      <Pressable
+                        key={s}
+                        onPress={() => setSelectedSize(s)}
+                        style={[
+                          styles.sizePill,
+                          {
+                            backgroundColor: selected
+                              ? colors.fg
+                              : "transparent",
+                            borderColor: colors.border,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={{
+                            color: selected ? colors.bg : colors.fg,
+                            fontWeight: "600",
+                          }}
+                        >
+                          {s}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : null}
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Bottom actions */}
+      <View
+        style={[
+          styles.bottomBar,
+          { backgroundColor: colors.bg, borderTopColor: colors.border },
+        ]}
+      >
+        <View style={[styles.qtyWrap, { borderColor: colors.border }]}>
+          <Pressable onPress={() => setQty((q) => Math.max(1, q - 1))}>
+            <Ionicons name="remove" size={20} color={colors.fg} />
+          </Pressable>
+          <Text style={[styles.qty, { color: colors.fg }]}>{qty}</Text>
+          <Pressable onPress={() => setQty((q) => q + 1)}>
+            <Ionicons name="add" size={20} color={colors.fg} />
+          </Pressable>
+        </View>
 
         <Pressable
-          disabled={oos}
-          onPress={() =>
-            add(
-              {
-                id: p.id,
-                title: p.title,
-                price: finalPrice(p),
-                image: p.image,
-              },
-              1
-            )
-          }
-          style={{
-            marginTop: 12,
-            paddingVertical: 14,
-            borderRadius: 12,
-            alignItems: "center",
-            backgroundColor: oos ? "#9ca3af" : colors.tint,
-          }}
+          onPress={onAdd}
+          style={[styles.outlineBtn, { borderColor: colors.fg }]}
         >
-          <Text style={{ color: colors.bg, fontWeight: "900" }}>
-            {oos ? "Unavailable" : "Add to Cart"}
+          <Ionicons name="bag-outline" size={18} color={colors.fg} />
+          <Text style={[styles.outlineText, { color: colors.fg }]}>
+            ADD TO CART
           </Text>
         </Pressable>
+
+        <Pressable
+          onPress={onBuy}
+          style={[styles.filledBtn, { backgroundColor: colors.fg }]}
+        >
+          <Text style={[styles.filledText, { color: colors.bg }]}>BUY NOW</Text>
+        </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  dotsWrap: { flexDirection: "row", alignSelf: "center", gap: 8, marginTop: 6 },
+  dot: { width: 6, height: 6, borderRadius: 3 },
+  row: { flexDirection: "row", alignItems: "center" },
+  rowBetween: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  brand: { fontSize: 13, fontWeight: "600" },
+  title: { fontSize: 20, fontWeight: "700", lineHeight: 26, marginTop: 2 },
+  rating: { fontSize: 13, fontWeight: "600" },
+  price: { fontSize: 22, fontWeight: "800" },
+  oldPrice: { fontSize: 16, fontWeight: "600" },
+  desc: { fontSize: 14, lineHeight: 20 },
+  label: { fontSize: 14, fontWeight: "700" },
+  colorDot: { width: 28, height: 28, borderRadius: 14 },
+  sizePill: {
+    minWidth: 42,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: "center",
+  },
+  bottomBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 14,
+    borderTopWidth: 1,
+  },
+  qtyWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  qty: { fontSize: 16, fontWeight: "700", minWidth: 18, textAlign: "center" },
+  outlineBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+  },
+  outlineText: { fontSize: 13, fontWeight: "800", letterSpacing: 0.3 },
+  filledBtn: { paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12 },
+  filledText: { fontSize: 13, fontWeight: "800", letterSpacing: 0.3 },
+});
