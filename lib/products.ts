@@ -195,6 +195,36 @@ export const PRODUCTS: Product[] = [
       "Ultra-portable laptop with Apple M2 chip, Retina display, and all-day battery life.",
     colors: ["#111827", "#9ca3af", "#e5e7eb"],
   },
+  {
+    id: "p11",
+    title: "Office Chair",
+    brand: "Hatil",
+    price: 50.0,
+    image: require("/Users/mahim/MyFirstApp/assets/images/New-Office-chair.jpg"),
+    rating: 4.5,
+    reviews: 89,
+    stock: 25,
+    categories: ["home"],
+    tags: ["chair"],
+    description:
+      "Executive Chair ,Model: EX-L006,Specification:Medium Back revolving chair with arms. Arms are made of T type soft PVC. Seat & back made of 12 mm ply with 50 mm thick foam cushioning covered with best imported net fabric. Also the back of chair middle part having rectangular shaped back-support for long time seating environment. Nylon leg-base with 5 Nos. PVC castors",
+    colors: ["#111827", "#374151", "#9ca3af"],
+  },
+  {
+    id: "p12",
+    title: "Tecno 2 Burner Gas Cooker (TTC-0303) Super Slim ",
+    brand: "Tecno",
+    price: 45.0,
+    image: require("/Users/mahim/MyFirstApp/assets/images/gas_stove.jpg"),
+    rating: 4.2,
+    reviews: 54,
+    stock: 30,
+    categories: ["home"],
+    tags: ["stove"],
+    description:
+      "Brand:Tecno,Model:TTC-0303,Number of Burners	:2Ignition System	Manual,Supported Gas Type	Natural & LPG Gas,Country of Brand Origin	China",
+    colors: ["#111827", "#6b7280", "#e5e7eb"],
+  },
 
   // ——— Medical aisle
   {
