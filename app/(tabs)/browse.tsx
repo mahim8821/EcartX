@@ -76,13 +76,12 @@ const FEATURED_H = 220; // total height for the Featured block (title + carousel
 export default function BrowseScreen() {
   const { colors } = useTheme();
   const { add } = useCart();
-  const { add: addToCart } = useCart();
   const wishlist = useWishlist();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<CatKey>("all");
   const [medSub, setMedSub] = useState<CatKey>("medical_medicine");
   const [sort, setSort] = useState<SortKey>("popular");
-
+  const [addingId, setAddingId] = useState<string | null>(null);
   // Animated scroll value
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -333,8 +332,9 @@ export default function BrowseScreen() {
           </Text>
         }
         renderItem={({ item }) => {
-          // 👇 put this line at the very top of renderItem:
           const outOfStock = (item.stock ?? 0) <= 0;
+          const isWished = wishlist.has(item.id);
+          const isAdding = addingId === item.id;
 
           return (
             <View
@@ -368,7 +368,8 @@ export default function BrowseScreen() {
                     </Text>
                   </View>
                 )}
-                {/* 👇 PASTE THE OOS BADGE RIGHT HERE, below the ribbon */}
+
+                {/* optional OOS badge */}
                 {outOfStock && (
                   <View
                     style={{
@@ -393,6 +394,7 @@ export default function BrowseScreen() {
                     </Text>
                   </View>
                 )}
+
                 <View style={styles.imgBox}>
                   <Image
                     source={item.image}
@@ -413,35 +415,48 @@ export default function BrowseScreen() {
                 <PriceLine colors={colors} p={item} />
               </Pressable>
 
-              {/* 👇 replace your old button with this conditional */}
+              {/* bottom button */}
               {outOfStock ? (
+                // Wishlist toggle when OOS
                 <Pressable
-                  onPress={() =>
-                    wishlist.add({
-                      id: item.id,
-                      title: item.title,
-                      image: item.image,
-                      price: item.price,
-                      brand: item.brand,
-                    })
-                  }
+                  onPress={() => {
+                    if (isWished) wishlist.remove(item.id);
+                    else
+                      wishlist.add({
+                        id: item.id,
+                        title: item.title,
+                        image: item.image,
+                        price: item.price,
+                        brand: item.brand,
+                      });
+                  }}
                   style={[
                     styles.addBtn,
                     {
-                      backgroundColor: "transparent",
+                      backgroundColor: isWished
+                        ? colors.tint + "15"
+                        : "transparent",
                       borderWidth: 1,
-                      borderColor: colors.tint,
+                      borderColor: isWished ? colors.tint : colors.border,
                     },
                   ]}
                 >
-                  <Text style={{ color: colors.tint, fontWeight: "700" }}>
-                    Add to Wishlist
+                  <Text
+                    style={{
+                      color: isWished ? colors.tint : colors.fg,
+                      fontWeight: "700",
+                    }}
+                  >
+                    {isWished ? "In Wishlist" : "Add to Wishlist"}
                   </Text>
                 </Pressable>
               ) : (
+                // Add to cart with brief "Added ✓" feedback
                 <Pressable
-                  onPress={() =>
-                    addToCart(
+                  onPress={() => {
+                    if (isAdding) return;
+                    setAddingId(item.id);
+                    add(
                       {
                         id: item.id,
                         title: item.title,
@@ -449,12 +464,19 @@ export default function BrowseScreen() {
                         image: item.image,
                       },
                       1
-                    )
-                  }
-                  style={[styles.addBtn, { backgroundColor: colors.tint }]}
+                    );
+                    setTimeout(() => setAddingId(null), 1000);
+                  }}
+                  style={[
+                    styles.addBtn,
+                    {
+                      backgroundColor: colors.tint,
+                      opacity: isAdding ? 0.7 : 1,
+                    },
+                  ]}
                 >
                   <Text style={{ color: colors.bg, fontWeight: "700" }}>
-                    Add to Cart
+                    {isAdding ? "Added ✓" : "Add to Cart"}
                   </Text>
                 </Pressable>
               )}

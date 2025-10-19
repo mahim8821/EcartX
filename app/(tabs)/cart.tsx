@@ -22,7 +22,6 @@ export default function CartScreen() {
   const mut = { color: colors.muted };
   const cardBg = { backgroundColor: colors.card, borderColor: colors.border };
   const goBrowse = () => router.replace("/(tabs)/browse");
-
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Stack.Screen

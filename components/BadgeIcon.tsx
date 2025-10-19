@@ -23,7 +23,7 @@ export default function BadgeIcon({
   const badge = Math.min(99, Math.max(0, count || 0));
   const inner = (
     <View
-      style={[{ padding: 6, borderRadius: 999, position: "relative" }, style]}
+      style={[{ padding: 0, borderRadius: 999, position: "relative" }, style]}
     >
       <Ionicons name={name} color={color} size={size} />
       {badge > 0 && (

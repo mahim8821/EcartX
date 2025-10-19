@@ -110,6 +110,45 @@ export default function ProductDetails() {
 
   // ✅ product is defined here — safe to read stock
   const outOfStock = (product.stock ?? 0) <= 0;
+  // --- wishlist active + add-to-cart feedback ---
+  const wished = wishlist.has(product.id);
+
+  const [adding, setAdding] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+
+  const toggleWishlist = () => {
+    if (wishlist.has(product.id)) {
+      wishlist.remove(product.id);
+    } else {
+      wishlist.add({
+        id: product.id,
+        title: product.title,
+        image: product.image,
+        price: priceNow,
+        brand: product.brand,
+      });
+    }
+  };
+
+  const addToCartOnce = () => {
+    if (adding) return;
+    setAdding(true);
+    cart.add(
+      {
+        id: product.id,
+        title:
+          showSizes && selectedSize
+            ? `${product.title} (${selectedSize})`
+            : product.title,
+        price: priceNow,
+        image: product.image,
+      },
+      qty
+    );
+    setJustAdded(true);
+    setAdding(false);
+    setTimeout(() => setJustAdded(false), 1000);
+  };
 
   // Colors: keep defaults if product doesn't define them
   const colorOptions: string[] = (product as any).colors ?? [
@@ -160,16 +199,35 @@ export default function ProductDetails() {
           headerTitleStyle: { color: colors.fg },
           headerTintColor: colors.fg,
           headerRight: () => (
-            <Pressable
-              onPress={() => router.push("/(tabs)/cart")}
-              style={{
-                padding: 6,
-                backgroundColor: colors.card,
-                borderRadius: 999,
-              }}
-            >
-              <Ionicons name="cart-outline" size={18} color={colors.fg} />
-            </Pressable>
+            <View style={{ flexDirection: "row", gap: 6 }}>
+              {/* Heart (toggle active/inactive) */}
+              <Pressable
+                onPress={toggleWishlist}
+                style={{
+                  padding: 6,
+                  backgroundColor: colors.card,
+                  borderRadius: 999,
+                }}
+              >
+                <Ionicons
+                  name={wished ? "heart" : "heart-outline"}
+                  size={18}
+                  color={wished ? colors.tint : colors.fg}
+                />
+              </Pressable>
+
+              {/* Cart */}
+              <Pressable
+                onPress={() => router.push("/(tabs)/cart")}
+                style={{
+                  padding: 6,
+                  backgroundColor: colors.card,
+                  borderRadius: 999,
+                }}
+              >
+                <Ionicons name="cart-outline" size={18} color={colors.fg} />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -394,46 +452,68 @@ export default function ProductDetails() {
         </View>
 
         {outOfStock ? (
-          // OOS → only wishlist button
+          // OOS → wishlist toggle (active/inactive)
           <Pressable
-            onPress={() =>
-              wishlist.add({
-                id: product.id,
-                title: product.title,
-                image: product.image,
-                price: priceNow,
-                brand: product.brand,
-              })
-            }
-            style={[styles.outlineBtn, { borderColor: colors.tint }]}
+            onPress={toggleWishlist}
+            style={[
+              styles.outlineBtn,
+              {
+                borderColor: wished ? colors.tint : colors.border,
+                backgroundColor: wished ? colors.tint + "15" : "transparent",
+              },
+            ]}
           >
-            <Ionicons name="heart-outline" size={18} color={colors.tint} />
-            <Text style={[styles.outlineText, { color: colors.tint }]}>
-              ADD TO WISHLIST
+            <Ionicons
+              name={wished ? "heart" : "heart-outline"}
+              size={18}
+              color={wished ? colors.tint : colors.fg}
+            />
+            <Text
+              style={[
+                styles.outlineText,
+                { color: wished ? colors.tint : colors.fg },
+              ]}
+            >
+              {wished ? "IN WISHLIST" : "ADD TO WISHLIST"}
             </Text>
           </Pressable>
         ) : (
           <>
             <Pressable
-              onPress={() => {
-                if ((product.stock ?? 0) <= 0) return; // safety
-                onAdd();
-              }}
-              style={[styles.outlineBtn, { borderColor: colors.fg }]}
+              onPress={addToCartOnce}
+              disabled={adding}
+              style={[
+                styles.outlineBtn,
+                { borderColor: colors.fg, opacity: adding ? 0.6 : 1 },
+              ]}
             >
-              <Ionicons name="bag-outline" size={18} color={colors.fg} />
+              {adding ? (
+                <Ionicons name="time-outline" size={18} color={colors.fg} />
+              ) : justAdded ? (
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={18}
+                  color={colors.fg}
+                />
+              ) : (
+                <Ionicons name="bag-outline" size={18} color={colors.fg} />
+              )}
               <Text style={[styles.outlineText, { color: colors.fg }]}>
-                ADD TO CART
+                {adding ? "ADDING…" : justAdded ? "ADDED ✓" : "ADD TO CART"}
               </Text>
             </Pressable>
 
             <Pressable
               onPress={() => {
-                if ((product.stock ?? 0) <= 0) return; // safety
-                onAdd();
-                router.push("/payment"); // keep your route
+                if ((product.stock ?? 0) <= 0) return;
+                addToCartOnce();
+                router.push("/payment");
               }}
-              style={[styles.filledBtn, { backgroundColor: colors.fg }]}
+              disabled={adding}
+              style={[
+                styles.filledBtn,
+                { backgroundColor: colors.fg, opacity: adding ? 0.7 : 1 },
+              ]}
             >
               <Text style={[styles.filledText, { color: colors.bg }]}>
                 BUY NOW

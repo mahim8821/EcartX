@@ -78,8 +78,13 @@ export default function TabsLayout() {
         name="wishlist"
         options={{
           title: "Wishlist",
-          tabBarIcon: ({ color }) => (
-            <BadgeIcon name="heart-outline" color={color} count={wlCount} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <BadgeIcon
+              name={focused ? "heart" : "heart-outline"}
+              size={size}
+              color={color}
+              count={wlCount}
+            />
           ),
         }}
       />
