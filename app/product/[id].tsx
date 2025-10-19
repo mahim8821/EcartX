@@ -34,6 +34,12 @@ function discountPct(p: Product) {
 type SizeOption = "XS" | "S" | "M" | "L" | "XL";
 
 export default function ProductDetails() {
+  const { items: cartItems } = useCart() as any; // adjust if your cart exposes a different shape
+  const { count: wishlistCount, items: wlItems } = useWishlist();
+  const cartCount =
+    cartItems?.reduce?.((n: number, it: any) => n + (it.qty ?? 1), 0) ??
+    cartItems?.length ??
+    0;
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const cart = useCart();
@@ -53,7 +59,30 @@ export default function ProductDetails() {
           justifyContent: "center",
         }}
       >
-        <Stack.Screen options={{ title: "Detail Product" }} />
+        <Stack.Screen
+          options={{
+            title: "Detail Product",
+            headerStyle: { backgroundColor: colors.bg },
+            headerTitleStyle: { color: colors.fg },
+            headerTintColor: colors.fg,
+            headerRight: () => (
+              <View style={{ flexDirection: "row", gap: 4 }}>
+                <BadgeIcon
+                  name="heart-outline"
+                  color={colors.fg}
+                  count={wishlistCount ?? wlItems?.length ?? 0}
+                  onPress={() => router.push("/(tabs)/wishlist")}
+                />
+                <BadgeIcon
+                  name="cart-outline"
+                  color={colors.fg}
+                  count={cartCount}
+                  onPress={() => router.push("/(tabs)/cart")}
+                />
+              </View>
+            ),
+          }}
+        />
         <Text
           style={{
             color: colors.fg,
