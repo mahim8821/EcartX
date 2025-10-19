@@ -359,4 +359,5 @@ const s = StyleSheet.create({
   },
   socialText: { fontWeight: "600" },
   bottomLink: { textDecorationLine: "underline", marginTop: 6 },
+  link: { textDecorationLine: "underline", fontWeight: "700" },
 });

@@ -48,7 +48,9 @@ export default function PhoneOtp() {
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <TextInput
               key={i}
-              ref={(el) => (inputs.current[i] = el)}
+              ref={(el) => {
+                inputs.current[i] = el;
+              }}
               style={[
                 s.otpBox,
                 {

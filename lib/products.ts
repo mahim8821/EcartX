@@ -46,7 +46,7 @@ export const PRODUCTS: Product[] = [
     image: require("../assets/images/tshirt.png"),
     rating: 4.5,
     reviews: 136,
-    stock: 12,
+    stock: 0,
     categories: ["fashion"],
     tags: ["shirt", "top"],
     offer: { type: "percent", value: 15, label: "Deal" },
@@ -182,10 +182,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p10",
-    title: "Macbook Air M2",
+    title: "MacBook Air M2 13.6-inch 8/256GB 8 Core CPU 8 Core GPU",
     brand: "Apple",
     price: 999.0,
-    image: require("../assets/images/Macbook.jpg"),
+    image: require("/Users/mahim/MyFirstApp/assets/images/MacBook-Air-M2-13.webp"),
     rating: 4.3,
     reviews: 67,
     stock: 18,
@@ -222,10 +222,24 @@ export const PRODUCTS: Product[] = [
     categories: ["home"],
     tags: ["stove"],
     description:
-      "Brand:Tecno,Model:TTC-0303,Number of Burners	:2Ignition System	Manual,Supported Gas Type	Natural & LPG Gas,Country of Brand Origin	China",
+      "Brand:Tecno,Model:TTC-0303,Number of Burners	:2Ignition System	Manual,Supported Gas Type	Natural & LPG Gas,Country of Brand Origin:China",
     colors: ["#111827", "#6b7280", "#e5e7eb"],
   },
-
+  {
+    id: "p13",
+    title: "Portable Handheld Personal MINI Fan ",
+    brand: "none",
+    price: 5.0,
+    image: require("/Users/mahim/MyFirstApp/assets/images/porttablefan.webp"),
+    rating: 4.4,
+    reviews: 40,
+    stock: 100,
+    categories: ["electronics"],
+    tags: ["fan"],
+    description:
+    "Handheld Fan Portable Fan, Hand Fan with LED Display and 5 Speeds USB Rechargeable, Mini Fan for ideal for Travel, Bedroom, Office and Kids Pram, Small fan easy to carry in hand bags",
+    colors: ["#111827"],
+  },
   // ——— Medical aisle
   {
     id: "m1",

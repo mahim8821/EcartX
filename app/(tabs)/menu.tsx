@@ -151,10 +151,12 @@ export default function MenuScreen() {
         <View style={[styles.card, cardBg]}>
           <Text style={[styles.sectionTitle, fg]}>Your orders</Text>
           <View style={{ gap: 10 }}>
-            {[
-              // { id: "o123", title: "Sneakers", status: "Delivered" },
-              //{ id: "o124", title: "Headphones", status: "Processing" },
-            ].map((o) => (
+            {(
+              [
+                // { id: "o123", title: "Sneakers", status: "Delivered" },
+                // { id: "o124", title: "Headphones", status: "Processing" },
+              ] as { id: string; title: string; status: string }[]
+            ).map((o) => (
               <View
                 key={o.id}
                 style={{

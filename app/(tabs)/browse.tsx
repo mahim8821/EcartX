@@ -17,6 +17,7 @@ import {
 import { useCart } from "../../lib/cart";
 import { PRODUCTS, Product } from "../../lib/products";
 import { useTheme } from "../../lib/theme";
+import { useWishlist } from "../../lib/wishlist";
 
 /* ----------------------- Types & constants ----------------------- */
 
@@ -75,7 +76,8 @@ const FEATURED_H = 220; // total height for the Featured block (title + carousel
 export default function BrowseScreen() {
   const { colors } = useTheme();
   const { add } = useCart();
-
+  const { add: addToCart } = useCart();
+  const wishlist = useWishlist();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<CatKey>("all");
   const [medSub, setMedSub] = useState<CatKey>("medical_medicine");
@@ -330,77 +332,135 @@ export default function BrowseScreen() {
             {filtered.length} of {PRODUCTS.length} items
           </Text>
         }
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: colors.card, borderColor: colors.border },
-            ]}
-          >
-            {/* pressable top opens details */}
-            <Pressable
-              onPress={() =>
-                router.push({
-                  pathname: "/product/[id]",
-                  params: { id: item.id },
-                })
-              }
-              style={{ flex: 1 }}
+        renderItem={({ item }) => {
+          // 👇 put this line at the very top of renderItem:
+          const outOfStock = (item.stock ?? 0) <= 0;
+
+          return (
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors.card, borderColor: colors.border },
+              ]}
             >
-              {!!discountPct(item) && (
-                <View style={[styles.ribbon, { backgroundColor: colors.tint }]}>
-                  <Text
+              {/* pressable top opens details */}
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/product/[id]",
+                    params: { id: item.id },
+                  })
+                }
+                style={{ flex: 1 }}
+              >
+                {!!discountPct(item) && (
+                  <View
+                    style={[styles.ribbon, { backgroundColor: colors.tint }]}
+                  >
+                    <Text
+                      style={{
+                        color: colors.bg,
+                        fontWeight: "700",
+                        fontSize: 12,
+                      }}
+                    >
+                      -{discountPct(item)}%
+                    </Text>
+                  </View>
+                )}
+                {/* 👇 PASTE THE OOS BADGE RIGHT HERE, below the ribbon */}
+                {outOfStock && (
+                  <View
                     style={{
-                      color: colors.bg,
-                      fontWeight: "700",
-                      fontSize: 12,
+                      position: "absolute",
+                      right: 8,
+                      top: 8,
+                      backgroundColor: "#ef4444",
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                      borderRadius: 6,
+                      zIndex: 2,
                     }}
                   >
-                    -{discountPct(item)}%
-                  </Text>
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "700",
+                        fontSize: 10,
+                      }}
+                    >
+                      OOS
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.imgBox}>
+                  <Image
+                    source={item.image}
+                    style={styles.img}
+                    resizeMode="cover"
+                  />
                 </View>
-              )}
-              <View style={styles.imgBox}>
-                <Image
-                  source={item.image}
-                  style={styles.img}
-                  resizeMode="cover"
-                />
-              </View>
-              <Text
-                style={{
-                  color: colors.fg,
-                  fontWeight: "700",
-                  paddingHorizontal: 10,
-                }}
-                numberOfLines={1}
-              >
-                {item.title}
-              </Text>
-              <PriceLine colors={colors} p={item} />
-            </Pressable>
+                <Text
+                  style={{
+                    color: colors.fg,
+                    fontWeight: "700",
+                    paddingHorizontal: 10,
+                  }}
+                  numberOfLines={1}
+                >
+                  {item.title}
+                </Text>
+                <PriceLine colors={colors} p={item} />
+              </Pressable>
 
-            {/* Add to Cart */}
-            <Pressable
-              onPress={() =>
-                add(
-                  {
-                    id: item.id,
-                    title: item.title,
-                    price: item.price,
-                    image: item.image,
-                  },
-                  1
-                )
-              }
-              style={[styles.addBtn, { backgroundColor: colors.tint }]}
-            >
-              <Text style={{ color: colors.bg, fontWeight: "700" }}>
-                Add to Cart
-              </Text>
-            </Pressable>
-          </View>
-        )}
+              {/* 👇 replace your old button with this conditional */}
+              {outOfStock ? (
+                <Pressable
+                  onPress={() =>
+                    wishlist.add({
+                      id: item.id,
+                      title: item.title,
+                      image: item.image,
+                      price: item.price,
+                      brand: item.brand,
+                    })
+                  }
+                  style={[
+                    styles.addBtn,
+                    {
+                      backgroundColor: "transparent",
+                      borderWidth: 1,
+                      borderColor: colors.tint,
+                    },
+                  ]}
+                >
+                  <Text style={{ color: colors.tint, fontWeight: "700" }}>
+                    Add to Wishlist
+                  </Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  onPress={() =>
+                    addToCart(
+                      {
+                        id: item.id,
+                        title: item.title,
+                        price: item.price,
+                        image: item.image,
+                      },
+                      1
+                    )
+                  }
+                  style={[styles.addBtn, { backgroundColor: colors.tint }]}
+                >
+                  <Text style={{ color: colors.bg, fontWeight: "700" }}>
+                    Add to Cart
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          );
+        }}
         // Animated scroll handler
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],

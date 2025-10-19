@@ -6,6 +6,7 @@ import {
   Dimensions,
   FlatList,
   Image,
+  ImageSourcePropType,
   Pressable,
   StyleSheet,
   Text,

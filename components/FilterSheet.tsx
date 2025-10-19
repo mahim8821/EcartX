@@ -165,20 +165,20 @@ const field = (colors: any) => ({
   borderRadius: 10,
   padding: 10,
 });
-const btn = (colors: any, type: "primary" | "outline") =>
+const btn = (colors: any, type: "primary" | "outline"): any =>
   type === "primary"
-    ? {
+    ? ({
         flex: 1,
         backgroundColor: colors.tint,
         borderRadius: 12,
-        alignItems: "center",
+        alignItems: "center" as const,
         paddingVertical: 12,
-      }
-    : {
+      } as any)
+    : ({
         flex: 1,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 12,
-        alignItems: "center",
+        alignItems: "center" as const,
         paddingVertical: 12,
-      };
+      } as any);

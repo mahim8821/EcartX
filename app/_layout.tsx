@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { CartProvider } from "../lib/cart";
 import { ThemeProvider } from "../lib/theme";
-
+import { WishlistProvider } from "../lib/wishlist";
 /* function RootNav() {
   const { colors } = useTheme();
   return (
@@ -27,13 +27,15 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <CartProvider>
-        <StatusBar style="light" />
-        <Stack initialRouteName="splash">
-          <Stack.Screen name="splash" options={{ headerShown: false }} />
-          <Stack.Screen name="promo" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        </Stack>
+        <WishlistProvider>
+          <StatusBar style="light" />
+          <Stack initialRouteName="splash">
+            <Stack.Screen name="splash" options={{ headerShown: false }} />
+            <Stack.Screen name="promo" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          </Stack>
+        </WishlistProvider>
       </CartProvider>
     </ThemeProvider>
   );

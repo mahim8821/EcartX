@@ -15,6 +15,7 @@ import {
 import { useCart } from "../../lib/cart";
 import { PRODUCTS, type Product } from "../../lib/products";
 import { useTheme } from "../../lib/theme";
+import { useWishlist } from "../../lib/wishlist";
 
 /* ---- helpers (same as Browse) ---- */
 function finalPrice(p: Product) {
@@ -36,10 +37,12 @@ export default function ProductDetails() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const cart = useCart();
+  const wishlist = useWishlist();
   const router = useRouter();
 
   const product = useMemo(() => PRODUCTS.find((p) => p.id === id), [id]);
 
+  // Guard: product not found
   if (!product) {
     return (
       <View
@@ -76,6 +79,9 @@ export default function ProductDetails() {
     );
   }
 
+  // ✅ product is defined here — safe to read stock
+  const outOfStock = (product.stock ?? 0) <= 0;
+
   // Colors: keep defaults if product doesn't define them
   const colorOptions: string[] = (product as any).colors ?? [
     "#0f172a",
@@ -84,12 +90,11 @@ export default function ProductDetails() {
     "#e5e7eb",
   ];
 
-  // ✅ Show sizes ONLY for fashion items
+  // Show sizes ONLY for fashion items
   const isFashion = product.categories.includes("fashion" as any);
   const sizeOptions: SizeOption[] = isFashion
     ? (product as any).sizes ?? (["XS", "S", "M", "L", "XL"] as SizeOption[])
-    : []; // non-fashion → no sizes
-
+    : [];
   const showSizes = sizeOptions.length > 0;
 
   const [selectedColor, setSelectedColor] = useState<string>(colorOptions[0]);
@@ -115,11 +120,6 @@ export default function ProductDetails() {
       qty
     );
     Alert.alert("Added", "Item added to your cart.");
-  };
-
-  const onBuy = () => {
-    onAdd();
-    router.push("/payment");
   };
 
   return (
@@ -151,7 +151,7 @@ export default function ProductDetails() {
           <View
             style={{
               width: "100%",
-              aspectRatio: 1.2, // keeps a consistent hero shape
+              aspectRatio: 1.2, // uniform hero size
               overflow: "hidden",
               borderRadius: 12,
               backgroundColor: "#00000010",
@@ -160,7 +160,7 @@ export default function ProductDetails() {
             <Image
               source={product.image}
               style={{ width: "100%", height: "100%" }}
-              resizeMode="contain" // use "cover" if you prefer edge-to-edge
+              resizeMode="contain" // or "cover" for full-bleed
             />
           </View>
 
@@ -188,7 +188,18 @@ export default function ProductDetails() {
             <Text style={[styles.brand, { color: colors.muted }]}>
               {product.brand ?? "—"}
             </Text>
-            <Pressable onPress={() => {}}>
+            <Pressable
+              onPress={() =>
+                wishlist.add({
+                  id: product.id,
+                  title: product.title,
+                  image: product.image,
+                  price: priceNow,
+                  brand: product.brand,
+                })
+              }
+              accessibilityLabel="Add to wishlist"
+            >
               <Ionicons name="heart-outline" size={22} color={colors.fg} />
             </Pressable>
           </View>
@@ -308,42 +319,99 @@ export default function ProductDetails() {
               ) : null}
             </View>
           </View>
+
+          {/* OOS hint */}
+          {outOfStock && (
+            <Text
+              style={{
+                color: colors.muted,
+                marginTop: 8,
+                fontWeight: "600",
+              }}
+            >
+              Out of stock — add to wishlist to get it later.
+            </Text>
+          )}
         </View>
       </ScrollView>
 
-      {/* Bottom actions */}
+      {/* Bottom actions (wishlist when OOS) */}
       <View
         style={[
           styles.bottomBar,
           { backgroundColor: colors.bg, borderTopColor: colors.border },
         ]}
       >
-        <View style={[styles.qtyWrap, { borderColor: colors.border }]}>
-          <Pressable onPress={() => setQty((q) => Math.max(1, q - 1))}>
+        {/* Qty controls disabled if OOS */}
+        <View
+          style={[
+            styles.qtyWrap,
+            { borderColor: colors.border, opacity: outOfStock ? 0.5 : 1 },
+          ]}
+        >
+          <Pressable
+            onPress={() => !outOfStock && setQty((q) => Math.max(1, q - 1))}
+            disabled={outOfStock}
+          >
             <Ionicons name="remove" size={20} color={colors.fg} />
           </Pressable>
           <Text style={[styles.qty, { color: colors.fg }]}>{qty}</Text>
-          <Pressable onPress={() => setQty((q) => q + 1)}>
+          <Pressable
+            onPress={() => !outOfStock && setQty((q) => q + 1)}
+            disabled={outOfStock}
+          >
             <Ionicons name="add" size={20} color={colors.fg} />
           </Pressable>
         </View>
 
-        <Pressable
-          onPress={onAdd}
-          style={[styles.outlineBtn, { borderColor: colors.fg }]}
-        >
-          <Ionicons name="bag-outline" size={18} color={colors.fg} />
-          <Text style={[styles.outlineText, { color: colors.fg }]}>
-            ADD TO CART
-          </Text>
-        </Pressable>
+        {outOfStock ? (
+          // OOS → only wishlist button
+          <Pressable
+            onPress={() =>
+              wishlist.add({
+                id: product.id,
+                title: product.title,
+                image: product.image,
+                price: priceNow,
+                brand: product.brand,
+              })
+            }
+            style={[styles.outlineBtn, { borderColor: colors.tint }]}
+          >
+            <Ionicons name="heart-outline" size={18} color={colors.tint} />
+            <Text style={[styles.outlineText, { color: colors.tint }]}>
+              ADD TO WISHLIST
+            </Text>
+          </Pressable>
+        ) : (
+          <>
+            <Pressable
+              onPress={() => {
+                if ((product.stock ?? 0) <= 0) return; // safety
+                onAdd();
+              }}
+              style={[styles.outlineBtn, { borderColor: colors.fg }]}
+            >
+              <Ionicons name="bag-outline" size={18} color={colors.fg} />
+              <Text style={[styles.outlineText, { color: colors.fg }]}>
+                ADD TO CART
+              </Text>
+            </Pressable>
 
-        <Pressable
-          onPress={onBuy}
-          style={[styles.filledBtn, { backgroundColor: colors.fg }]}
-        >
-          <Text style={[styles.filledText, { color: colors.bg }]}>BUY NOW</Text>
-        </Pressable>
+            <Pressable
+              onPress={() => {
+                if ((product.stock ?? 0) <= 0) return; // safety
+                onAdd();
+                router.push("/payment"); // keep your route
+              }}
+              style={[styles.filledBtn, { backgroundColor: colors.fg }]}
+            >
+              <Text style={[styles.filledText, { color: colors.bg }]}>
+                BUY NOW
+              </Text>
+            </Pressable>
+          </>
+        )}
       </View>
     </View>
   );
