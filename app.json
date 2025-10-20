@@ -41,11 +41,19 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c99686d3-4c62-4ec8-93fa-bc247a1b3bf8"
+      }
+    },
+    "owner": "mahim8811"
   }
 }

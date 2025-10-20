@@ -9,7 +9,7 @@ export default function Splash() {
     const t = setTimeout(() => {
       // 👉 change "/" to "/browse" (or any route) if your main screen is different
       router.replace("/promo");
-    }, 1000); // 2seconds
+    }, 1000); // 1.5seconds
     return () => clearTimeout(t);
   }, []);
 

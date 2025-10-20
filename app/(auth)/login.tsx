@@ -7,6 +7,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -31,7 +32,7 @@ async function fakeSignIn(email: string, password: string) {
 export default function LoginScreen() {
   const router = useRouter();
   const { colors } = useTheme(); // 👈 global theme
-
+  const goSignup = () => router.replace("/(auth)/signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -195,13 +196,12 @@ export default function LoginScreen() {
 
         <View style={{ marginTop: 12, alignItems: "center" }}>
           <Text style={{ color: colors.muted }}>No account?</Text>
-          <Link
-            href="/(auth)/signup"
-            style={[styles.secondaryLink, { color: colors.fg }]}
-          >
-            Create one →
-          </Link>
         </View>
+        <TouchableOpacity onPress={goSignup}>
+          <Pressable style={styles.continue} onPress={goSignup}>
+            <Text style={styles.continueText}>Sign Up Here</Text>
+          </Pressable>
+        </TouchableOpacity>
 
         <View
           style={[
@@ -227,6 +227,14 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  continue: {
+    margin: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: "#0c8d76ff",
+  },
+  continueText: { color: "white", fontWeight: "700", fontSize: 16 },
   flex: { flex: 1 },
   container: { flex: 1, padding: 20, paddingTop: 40 },
   h1: { fontSize: 24, fontWeight: "800" },

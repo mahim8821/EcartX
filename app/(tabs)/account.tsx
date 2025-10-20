@@ -179,7 +179,7 @@ function AccountInfo({ colors }: any) {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("+8801XXXXXXXXX");
   const [email, setEmail] = useState("you@example.com");
-  const [gender, setGender] = useState("female");
+  const [gender, setGender] = useState("male");
   const [dob, setDob] = useState("2001-01-01");
 
   return (
@@ -187,11 +187,13 @@ function AccountInfo({ colors }: any) {
       {/* photo + change button (mock) */}
       <View style={{ alignItems: "center", gap: 8 }}>
         <Image
-          source={{ uri: "/Users/mahim/MyFirstApp/assets/images/yasir.jpg" }}
+          source={require("../../assets/images/userlogo.png")}
           style={{
             width: 86,
             height: 86,
             borderRadius: 43,
+            outlineWidth: 2,
+            outlineColor: colors.border,
             backgroundColor: "#00000010",
           }}
         />

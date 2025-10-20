@@ -1,5 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,7 +13,6 @@ import {
   View,
 } from "react-native";
 import { useTheme } from "../../lib/theme";
-
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -23,6 +22,7 @@ async function fakeCreateAccount() {
 }
 
 export default function Signup() {
+  const router = useRouter();
   const { colors } = useTheme();
 
   const [name, setName] = useState("");
@@ -84,6 +84,25 @@ export default function Signup() {
       style={[s.flex, { backgroundColor: colors.bg }]}
       behavior={Platform.select({ ios: "padding", android: undefined })}
     >
+      <Stack.Screen
+        options={{
+          title: "Sign Sign up",
+          headerStyle: { backgroundColor: colors.bg },
+          headerTitleStyle: { color: colors.fg },
+          headerTintColor: colors.fg,
+          // 👇 custom back that always goes to Menu tab
+          headerBackVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.replace("/(tabs)/menu")}
+              style={{ paddingHorizontal: 8, paddingVertical: 6 }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="arrow-back" size={22} color={colors.fg} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <View style={[s.container]}>
         {/* Header */}
         <Text style={[s.h1, { color: colors.fg }]}>Create your account</Text>
