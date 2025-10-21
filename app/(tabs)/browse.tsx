@@ -1,7 +1,7 @@
 // app/(tabs)/browse.tsx
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Animated,
   FlatList,
@@ -19,8 +19,7 @@ import { PRODUCTS, Product } from "../../lib/products";
 import { useTheme } from "../../lib/theme";
 import { useWishlist } from "../../lib/wishlist";
 
-/* ----------------------- Types & constants ----------------------- */
-
+//Types & constants
 type CatKey =
   | "all"
   | "fashion"
@@ -53,8 +52,7 @@ const SORT_LABEL: Record<SortKey, string> = {
   discount: "Discount",
 };
 
-/* ----------------------- Price helpers ----------------------- */
-
+//Price helpers
 function finalPrice(p: Product) {
   if (!p.offer) return p.price;
   if (p.offer.type === "percent")
@@ -71,7 +69,6 @@ function discountPct(p: Product) {
 /* ============================== Screen ============================== */
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<Product>);
-const FEATURED_H = 220; // total height for the Featured block (title + carousel). Tweak if needed.
 
 export default function BrowseScreen() {
   const { colors } = useTheme();
@@ -82,35 +79,8 @@ export default function BrowseScreen() {
   const [medSub, setMedSub] = useState<CatKey>("medical_medicine");
   const [sort, setSort] = useState<SortKey>("popular");
   const [addingId, setAddingId] = useState<string | null>(null);
-  // Animated scroll value
-  const scrollY = useRef(new Animated.Value(0)).current;
 
-  // Interpolations for the Featured section
-  const collapse = scrollY.interpolate({
-    inputRange: [0, 40, 140], // start hiding quickly, fully hidden by ~140px
-    outputRange: [0, 0.5, 1], // 0 = open, 1 = collapsed
-    extrapolate: "clamp",
-  });
-
-  const featuredHeight = collapse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [FEATURED_H, 0],
-    extrapolate: "clamp",
-  });
-
-  const featuredOpacity = collapse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 0],
-    extrapolate: "clamp",
-  });
-
-  const featuredTranslateY = collapse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -20], // subtle slide up
-    extrapolate: "clamp",
-  });
-
-  // Featured deals
+  // Featured deals (>= 15% off, top 10)
   const deals = useMemo(
     () => PRODUCTS.filter((p) => discountPct(p) >= 15).slice(0, 10),
     []
@@ -154,7 +124,14 @@ export default function BrowseScreen() {
   }, [q, cat, medSub, sort]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.bg,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: colors.border,
+      }}
+    >
       <Stack.Screen
         options={{
           title: "EcartX",
@@ -238,88 +215,7 @@ export default function BrowseScreen() {
         </ScrollView>
       )}
 
-      {/* Animated Featured deals */}
-      <Animated.View
-        style={{
-          height: featuredHeight,
-          opacity: featuredOpacity,
-          transform: [{ translateY: featuredTranslateY }],
-          overflow: "hidden",
-          paddingTop: 8,
-        }}
-        pointerEvents="box-none"
-      >
-        {deals.length > 0 && (
-          <View>
-            <Text
-              style={{
-                color: colors.fg,
-                fontWeight: "700",
-                paddingHorizontal: 12,
-                marginBottom: 6,
-              }}
-            >
-              Featured deals
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 12, gap: 12 }}
-            >
-              {deals.map((p) => (
-                <Pressable
-                  key={"deal-" + p.id}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/product/[id]",
-                      params: { id: p.id },
-                    })
-                  }
-                  style={[
-                    styles.dealCard,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  {!!discountPct(p) && (
-                    <View
-                      style={[styles.ribbon, { backgroundColor: colors.tint }]}
-                    >
-                      <Text
-                        style={{
-                          color: colors.bg,
-                          fontWeight: "700",
-                          fontSize: 12,
-                        }}
-                      >
-                        -{discountPct(p)}%
-                      </Text>
-                    </View>
-                  )}
-                  <View style={styles.dealImgBox}>
-                    <Image
-                      source={p.image}
-                      style={styles.img}
-                      resizeMode="cover"
-                    />
-                  </View>
-                  <Text
-                    style={{ color: colors.fg, fontWeight: "700" }}
-                    numberOfLines={1}
-                  >
-                    {p.title}
-                  </Text>
-                  <PriceLine colors={colors} p={p} />
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-      </Animated.View>
-
-      {/* Product grid */}
+      {/* Product grid with Featured deals at the very top ONLY in All category */}
       <AnimatedFlatList
         data={filtered}
         keyExtractor={(item) => item.id}
@@ -327,9 +223,87 @@ export default function BrowseScreen() {
         columnWrapperStyle={{ gap: 12, paddingHorizontal: 12 }}
         contentContainerStyle={{ paddingVertical: 12, gap: 12 }}
         ListHeaderComponent={
-          <Text style={{ color: colors.muted, paddingHorizontal: 12 }}>
-            {filtered.length} of {PRODUCTS.length} items
-          </Text>
+          <View style={{ gap: 12 }}>
+            {/* Featured deals row FIRST (only for All) */}
+            {cat === "all" && deals.length > 0 && (
+              <View style={{ paddingTop: 0 }}>
+                <Text
+                  style={{
+                    color: colors.fg,
+                    fontWeight: "800",
+                    fontStyle: "bold",
+                    fontSize: 20,
+                    paddingHorizontal: 12,
+                    marginBottom: 6,
+                  }}
+                >
+                  Featured deals 🔥
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 12, gap: 18 }}
+                >
+                  {deals.map((p) => (
+                    <Pressable
+                      key={"deal-" + p.id}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/product/[id]",
+                          params: { id: p.id },
+                        })
+                      }
+                      style={[
+                        styles.dealCard,
+                        {
+                          backgroundColor: colors.card,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                    >
+                      {!!discountPct(p) && (
+                        <View
+                          style={[
+                            styles.ribbon,
+                            { backgroundColor: colors.tint },
+                          ]}
+                        >
+                          <Text
+                            style={{
+                              color: colors.bg,
+                              fontWeight: "900",
+                              fontSize: 12,
+                            }}
+                          >
+                            -{discountPct(p)}%
+                          </Text>
+                        </View>
+                      )}
+                      <View style={styles.dealImgBox}>
+                        <Image
+                          source={p.image}
+                          style={styles.img}
+                          resizeMode="cover"
+                        />
+                      </View>
+                      <Text
+                        style={{ color: colors.fg, fontWeight: "700" }}
+                        numberOfLines={1}
+                      >
+                        {p.title}
+                      </Text>
+                      <PriceLine colors={colors} p={p} />
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* count line */}
+            <Text style={{ color: colors.muted, paddingHorizontal: 12 }}>
+              {filtered.length} of {PRODUCTS.length} items
+            </Text>
+          </View>
         }
         renderItem={({ item }) => {
           const outOfStock = (item.stock ?? 0) <= 0;
@@ -395,13 +369,15 @@ export default function BrowseScreen() {
                   </View>
                 )}
 
-                <View style={styles.imgBox}>
-                  <Image
-                    source={item.image}
-                    style={styles.img}
-                    resizeMode="cover"
-                  />
-                </View>
+                {
+                  <View style={styles.imgBox}>
+                    <Image
+                      source={item.image}
+                      style={styles.img}
+                      resizeMode="cover"
+                    />
+                  </View>
+                }
                 <Text
                   style={{
                     color: colors.fg,
@@ -483,12 +459,6 @@ export default function BrowseScreen() {
             </View>
           );
         }}
-        // Animated scroll handler
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       />
     </View>

@@ -192,8 +192,8 @@ function AccountInfo({ colors }: any) {
             width: 86,
             height: 86,
             borderRadius: 43,
-            outlineWidth: 2,
-            outlineColor: colors.border,
+            borderWidth: 2,
+            borderColor: colors.border,
             backgroundColor: "#00000010",
           }}
         />
@@ -288,7 +288,7 @@ function AddressSection({ colors }: any) {
   const [country, setCountry] = useState("");
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 300 }}>
       <Row icon="home" label="Address" colors={colors}>
         <TextField
           value={line1}

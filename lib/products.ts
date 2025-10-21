@@ -73,7 +73,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p3",
-    title: "Backpack",
+    title: "Bag",
     brand: "Urban",
     price: 29.5,
     image: require("../assets/images/backpack.jpeg"),
@@ -306,7 +306,7 @@ export const PRODUCTS: Product[] = [
     title: "Blood Pressure Monitor (OMRON)",
     brand: "Omron",
     price: 45.0,
-    image: require("../assets/images/BPM.avif"),
+    image: require("../assets/images/bpm.webp"),
     rating: 4.7,
     reviews: 128,
     stock: 10,

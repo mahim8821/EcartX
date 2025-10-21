@@ -55,7 +55,7 @@ const MOCK_ORDERS: Order[] = [
     date: "2025-08-20",
     items: 1,
     total: 199.0,
-    status: "cancelled",
+    status: "Cancelled",
   },
 ];
 

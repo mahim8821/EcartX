@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import BadgeIcon from "../../components/BadgeIcon";
 import { useCart } from "../../lib/cart";
 import { PRODUCTS, type Product } from "../../lib/products";
 import { useTheme } from "../../lib/theme";
